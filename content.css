@@ -352,3 +352,132 @@
 .gc-btn svg { color:#2f9e6e; }
 .gc-folder:hover { background:#e7f4ec; outline:1px solid #9fd3b8; }
 .gc-folder .pp-folder__t b { color:#1f6e49; }
+
+/* ====================================================================
+   DIAGRID OPTIMIZATION (ARCC 2025) — structural-research folder
+   Reuses the .pp-* folder system; recolors the accent magenta and adds
+   a structural banner to brand it apart from Pick & Place / Golf.
+   ==================================================================== */
+.dg-root { --tg-cyan:#EC008C; }                /* tile-hover / accent → magenta */
+.dg__side { background:linear-gradient(180deg,#f3f6fb 0%,#e4ebf6 62%,#d7e2f1 100%); }
+
+/* tighter author/tech meta in the blue sidebar */
+.dg-meta .pp-meta__k { color:#2f4f8a; }
+.dg-meta .pp-meta__v { color:#10244a; }
+
+/* structural banner under the breadcrumb */
+.dg-banner {
+  margin:14px 16px 0; padding:10px 13px;
+  border-left:3px solid #EC008C; background:#fcf0f6;
+  font-family:var(--tg-mono); font-size:11.5px; line-height:1.5; color:#234;
+}
+.dg-banner__tag {
+  display:block; margin-bottom:4px;
+  font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:#b30068; font-weight:600;
+}
+
+/* magenta-accented primary button + folder hover */
+.dg-btn { border-color:#EC008C !important; color:#8a0050 !important; }
+.dg-btn svg { color:#EC008C; }
+.dg-folder:hover { background:#fdeef6; outline:1px solid #f3b5d6; }
+.dg-folder .pp-folder__t b { color:#13357e; }
+
+/* ====================================================================
+   ACTIVE BENDING CURVED-LINE FOLDING (ARCC 2025) — lightweight-structures folder
+   Reuses the .pp-* folder system; recolors the accent warm ochre to echo
+   the timber decking of the pavilion renders.
+   ==================================================================== */
+.ab-root { --tg-cyan:#b9791b; }                /* tile-hover / accent → ochre */
+.ab__side { background:linear-gradient(180deg,#f8f4ec 0%,#efe6d4 62%,#e7dbc3 100%); }
+
+/* tighter author/tech meta in the warm sidebar */
+.ab-meta .pp-meta__k { color:#8a6411; }
+.ab-meta .pp-meta__v { color:#3c2c08; }
+
+/* structural banner under the breadcrumb */
+.ab-banner {
+  margin:14px 16px 0; padding:10px 13px;
+  border-left:3px solid #b9791b; background:#faf3e6;
+  font-family:var(--tg-mono); font-size:11.5px; line-height:1.5; color:#332; 
+}
+.ab-banner__tag {
+  display:block; margin-bottom:4px;
+  font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:#8a6411; font-weight:600;
+}
+
+/* ochre-accented primary button + folder hover */
+.ab-btn { border-color:#b9791b !important; color:#6e480d !important; }
+.ab-btn svg { color:#b9791b; }
+.ab-folder:hover { background:#faf2e2; outline:1px solid #e0c489; }
+.ab-folder .pp-folder__t b { color:#6e480d; }
+
+/* ====================================================================
+   ROTEGRITY (Tabriz Islamic Arts University, 2019) — design-studio folder
+   Reuses the .pp-* folder system; steel-blue accent + a nexor glossary
+   and a 2-up board gallery. No publication (academic studio project).
+   ==================================================================== */
+.rt-root { --tg-cyan:#2f5fae; }                /* tile-hover / accent → steel blue */
+.rt__side { background:linear-gradient(180deg,#eef2f9 0%,#dde6f3 62%,#cfdcee 100%); }
+
+.rt-meta .pp-meta__k { color:#2f4f8a; }
+.rt-meta .pp-meta__v { color:#10244a; }
+
+/* banner under the breadcrumb */
+.rt-banner {
+  margin:14px 16px 0; padding:10px 13px;
+  border-left:3px solid #2f5fae; background:#eef3fb;
+  font-family:var(--tg-mono); font-size:11.5px; line-height:1.5; color:#223;
+}
+.rt-banner__tag {
+  display:block; margin-bottom:4px;
+  font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:#23477e; font-weight:600;
+}
+
+/* hero render sits on a near-black plate (renders are on black) */
+.rt-hero { background:#0c0e12; }
+.rt-hero img { object-position:center; }
+.rt-hero video { width:100%; height:260px; object-fit:cover; display:block; background:#0c0e12; }
+
+/* nexor glossary — definition rows grouped by whitespace + a hairline */
+.rt-gloss { margin:0 16px; }
+.rt-gloss__row {
+  display:grid; grid-template-columns:128px 1fr; gap:14px;
+  padding:7px 0; border-bottom:0.5px solid var(--tg-grey-20);
+}
+.rt-gloss__row:last-child { border-bottom:none; }
+.rt-gloss__k {
+  font-family:var(--tg-mono); font-weight:500; font-size:11px; color:#23477e;
+}
+.rt-gloss__v {
+  font-family:var(--tg-mono); font-size:11px; line-height:1.5; color:var(--tg-grey-80); max-width:70ch;
+}
+
+/* steel-blue button + folder hover */
+.rt-btn { border-color:#2f5fae !important; color:#1d3c75 !important; }
+.rt-folder:hover { background:#eef3fb; outline:1px solid #aac3e8; }
+.rt-folder .pp-folder__t b { color:#1d3c75; }
+
+/* presentation boards read as large 2-up landscape panels */
+.rt-gallery--boards { grid-template-columns:1fr 1fr; }
+.rt-gallery--boards .pp-tile__img { height:210px; background:#fff; }
+.rt-gallery--boards .pp-tile__img img { object-fit:contain; }
+
+/* nexorade-principle animation player (top of the Principles gallery) */
+.rt-vid { border:1px solid #c8c4b4; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.10); margin-bottom:16px; }
+.rt-vid__bar {
+  display:flex; align-items:center; gap:7px;
+  padding:5px 10px; font-size:11px; color:#333;
+  background:linear-gradient(180deg,#fdfefe,#ece9d8);
+  border-bottom:1px solid #c8c4b4;
+}
+.rt-vid__meta { margin-left:auto; color:#8a8674; }
+.rt-vid video { width:100%; max-height:380px; display:block; background:#f4f6f9; }
+
+/* nexorade-principle diagrams are line art — show them whole on white */
+.rt-gallery--principles .pp-tile__img { background:#fff; }
+.rt-gallery--principles .pp-tile__img img { object-fit:contain; }
+
+@media (max-width:620px) {
+  .rt-gallery--boards { grid-template-columns:1fr; }
+  .rt-gloss__row { grid-template-columns:1fr; gap:2px; }
+}

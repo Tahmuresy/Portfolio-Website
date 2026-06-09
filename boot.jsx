@@ -12,7 +12,7 @@ function BootSplash({ onDone, logo }) {
       <div className="boot__bar"></div>
       <div className="boot__foot">
         <div className="boot__corp">Computational <span>·</span> Robotic <span>·</span> AEC</div>
-        <div>JRL-OS — Professional</div>
+        <div>Tahmures Ghiyasi OS — Professional</div>
       </div>
     </div>
   );
