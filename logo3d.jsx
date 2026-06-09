@@ -39,8 +39,8 @@ const L3D = {
 
   // --- model placement ---
   MODEL_FIT_W: 10,                 // model is normalised so its width = this
-  MODEL_SCALE: 0.75,               // then multiplied by this
-  MODEL_POS:  [0, 0.72, 0],        // world offset after centring
+  MODEL_SCALE: 0.58,               // then multiplied by this
+  MODEL_POS:  [0.82, -0.16, 0],    // world offset after centring
   MODEL_ROT:  [0, 0, 0],           // extra rotation (deg) X,Y,Z if up-axis is off
 
   // --- piece welding (used only when the model is ONE node of many meshes;

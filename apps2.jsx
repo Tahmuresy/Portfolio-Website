@@ -338,11 +338,13 @@ A2.Projects = ({ open }) => {
   const items = [
     ["pickplace","Robotic Pick & Place", I2.Folder()],
     ["golfpavilion","Golf Club Pavilion", I2.Folder()],
+    ["diagrid","Diagrid Optimization (ARCC 2025)", I2.Folder()],
+    ["activebending","Active Bending Curved-Line Folding (ARCC 2025)", I2.Folder()],
+    ["rotegrity","Rotegrity", I2.Folder()],
     ["robotic","Robotic_Fabrication.exe", I2.Exe()],
     ["rdmodular","RD_Modular_System.dll", I2.Dll()],
     ["housing","Ayman_Housing_Project.jpg", I2.Jpg()],
     ["patent","Jointless_Timber_Patent.pdf", I2.Pdf()],
-    ["diagrid","Diagrid_Optimization", I2.Diagrid()],
     ["mycomputer","Skills (My Computer)", I2.MyComputer()],
   ];
   return (

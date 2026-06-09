@@ -1,5 +1,6 @@
 /* apps1.jsx — window CONTENT: My Computer, Robotic_Fabrication terminal,
-   RD_Modular_System, Diagrid. Exported to window.Apps. */
+   RD_Modular_System. Exported to window.Apps.
+   (Diagrid now lives in apps5.jsx as a full project folder.) */
 const { useState, useEffect, useRef } = React;
 const Apps = window.Apps || (window.Apps = {});
 const I = window.Icons;
@@ -112,7 +113,7 @@ Apps.MyComputer = ({ open }) => {
    ROBOTIC_FABRICATION.EXE — terminal
    ==================================================================== */
 const BOOT_LINES = [
-  { t:"JRL-OS v2.5  ·  Jointless Reciprocal Lattice runtime", c:"c-key" },
+  { t:"Tahmures Ghiyasi OS v2.5  ·  Jointless Reciprocal Lattice runtime", c:"c-key" },
   { t:"(c) Tahmures Ghiyasi — Human-Robot Collaboration Lab, TTU", c:"c-dim" },
   { t:"" },
   { t:"[ ok ] mounting UR20 kinematic controller .......... ONLINE", c:"c-ok" },
@@ -286,33 +287,4 @@ Apps.RDModular = () => (
   </div>
 );
 
-/* ====================================================================
-   DIAGRID OPTIMIZATION
-   ==================================================================== */
-Apps.Diagrid = () => (
-  <div className="pad pad--cols xp-scroll doc">
-    <div>
-      <div className="ds-label" style={{"--ds-accent":"#EC008C"}}>Structural Study · ARCC 2025</div>
-      <hr className="ds-rule" style={{borderTopColor:"#EC008C"}}/>
-      <h1 className="ds-h1">Geometry against lateral load.</h1>
-      <p className="ds-kicker">A study on how geometric optimization of diagrid systems changes the
-        way the structure bears lateral forces — published at ARCC 2025, University of Maryland.</p>
-      <div className="plate"><img src="assets/img/clustering.jpg" alt="point clustering"/></div>
-      <p className="ds-cap">Fig. 1 — Clustering nodes and extracting the boundary for an accurate
-        structural representation.</p>
-      <h3 className="ds-h3" style={{marginTop:16}}>Method</h3>
-      <p className="ds-body">I parameterized the diagonal angle and node density of a diagrid tower
-        and swept them under a fixed lateral load in Karamba3D, then drove a multi-objective search
-        (Wallacei) toward minimum drift per unit of material. The optimal band is narrower than
-        intuition suggests — a few degrees off the ideal diagonal costs disproportionately.</p>
-    </div>
-    <aside className="pad__side">
-      <div className="slab">Venue</div>ARCC 2025 — U. of Maryland
-      <div className="slab">Authors</div>T. Ghiyasi · A. Ghazvinian
-      <div className="slab">Tools</div>Grasshopper · Karamba3D · Wallacei
-      <div className="slab">Variables</div>diagonal angle · node density
-      <div className="slab">Objective</div>min drift / material
-      <div className="slab">Year</div>2025
-    </aside>
-  </div>
-);
+

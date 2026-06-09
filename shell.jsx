@@ -10,9 +10,11 @@ const REG = {
   housing: { title: "Ayman_Housing_Project.jpg — Windows Picture and Fax Viewer", icon: "Jpg", comp: "PictureViewer", w: 580, h: 470 },
   patent: { title: "Jointless_Timber_Patent.pdf — Adobe Reader", icon: "Pdf", comp: "Acrobat", w: 760, h: 560 },
   recycle: { title: "Recycle Bin", icon: "Recycle", comp: "Recycle", w: 480, h: 360 },
-  diagrid: { title: "Diagrid_Optimization", icon: "Diagrid", comp: "Diagrid", w: 720, h: 540 },
+  diagrid: { title: "Diagrid Optimization (ARCC 2025)", icon: "Folder", comp: "Diagrid", w: 860, h: 620 },
   pickplace: { title: "Layer-by-Layer Pick and Place Collaboration Between Human and Robot Using Optimization", icon: "Folder", comp: "PickPlace", w: 820, h: 600 },
   golfpavilion: { title: "Innovative Reclamation and Design: A Lightweight Structure from Reclaimed Golf Clubs", icon: "Folder", comp: "GolfPavilion", w: 880, h: 630 },
+  activebending: { title: "Active Bending Curved-Line Folding (ARCC 2025)", icon: "Folder", comp: "ActiveBending", w: 880, h: 630 },
+  rotegrity: { title: "Rotegrity", icon: "Folder", comp: "Rotegrity", w: 900, h: 640 },
   resume: { title: "My Résumé — WordPad", icon: "Notepad", comp: "Resume", w: 620, h: 540 },
   contact: { title: "Contact", icon: "Mail", comp: "Contact", w: 460, h: 400 },
   projects: { title: "My Projects", icon: "Folder", comp: "Projects", w: 580, h: 410 },
@@ -20,37 +22,47 @@ const REG = {
 };
 const ICON = (name) => window.Icons[name] ? window.Icons[name]() : null;
 
-/* ---- desktop items: scattered (non-grid), draggable, persisted ----
+/* ---- desktop items: organised into four corners, still draggable + persisted.
+   Each item carries an anchor + offsets (ax, ay) resolved to pixels at init:
+     "tl" top-left      → x = ax,                 y = ay
+     "tr" top-right     → x = innerWidth  - ax,   y = ay
+     "br" bottom-right  → x = innerWidth  - ax,   y = innerHeight - ay
    kind:"win" opens a window (REG[key]); kind:"app" throws a decoy splash/error;
    kind:"link" opens an external URL in a new tab. */
 const DESK_ITEMS = [
-{ key: "mycomputer", kind: "win", label: "My Computer", img: "assets/img/ic-mycomputer.png", x: 44, y: 30 },
-{ key: "robotic", kind: "win", label: "Robotic_Fabrication.exe", x: 150, y: 152, preview: "assets/img/brick-laying.jpg", caption: "Robotic Fabrication", year: "2023" },
-{ key: "patent", kind: "win", label: "Jointless_Timber_Patent.pdf", x: 46, y: 290, preview: "assets/img/dome.jpg", caption: "Jointless Timber Patent", year: "2024" },
-{ key: "diagrid", kind: "win", label: "Diagrid_Optimization", x: 292, y: 34, preview: "assets/img/clustering.jpg", caption: "Diagrid Optimization", year: "2025" },
-{ key: "pickplace", kind: "win", label: "Robotic Pick & Place", x: 290, y: 182, preview: "assets/img/pp-hero.jpg", caption: "Robotic Pick & Place", year: "2023" },
-{ key: "golfpavilion", kind: "win", label: "Golf Club Pavilion", x: 292, y: 332, preview: "assets/img/golf/golf-hero.jpg", caption: "Golf Club Pavilion", year: "2024" },
-{ key: "rhino", kind: "app", label: "Rhinoceros 5", img: "assets/img/app-rhino.png", x: 542, y: 58 },
-{ key: "illustrator", kind: "app", label: "Adobe Illustrator CS6", img: "assets/img/app-illustrator.png", x: 668, y: 40 },
-{ key: "photoshop", kind: "app", label: "Photoshop CS4", img: "assets/img/app-photoshop.png", x: 792, y: 30 },
-{ key: "lumion", kind: "app", label: "Lumion 6", img: "assets/img/app-lumion.png", x: 918, y: 40 },
-{ key: "sketchup", kind: "app", label: "SketchUp Pro 2015", img: "assets/img/app-sketchup.png", x: 542, y: 196 },
-{ key: "max3ds", kind: "app", label: "3ds Max 2014", img: "assets/img/app-3dsmax.png", x: 668, y: 196 },
-{ key: "keyshot", kind: "app", label: "KeyShot 6", img: "assets/img/app-keyshot.jpg", x: 918, y: 196 },
-{ key: "newfolder", kind: "win", label: "New Folder", x: 1012, y: 96 },
-{ key: "autocad", kind: "app", label: "AutoCAD 2012", img: "assets/img/app-autocad.png", x: 1150, y: 250 },
-{ key: "revit", kind: "app", label: "Revit 2017", img: "assets/img/app-revit.png", x: 1146, y: 402 },
-// games — nostalgic decoy launchers
-{ key: "dota2", kind: "app", label: "Dota 2", img: "assets/img/ic-dota2.png", brand: true, x: 690, y: 600 },
-{ key: "steam", kind: "app", label: "Steam", img: "assets/img/ic-steam-new.webp", brand: true, x: 772, y: 600 },
-{ key: "cs16", kind: "app", label: "Counter-Strike 1.6", img: "assets/img/ic-cs-new.png", brand: true, x: 854, y: 600 },
-// social links
-{ key: "spotify", kind: "link", label: "Spotify", img: "assets/img/ic-spotify.jpg", brand: true, url: "https://open.spotify.com/user/31ggydruftgxouqt7d2nobfpxohq?si=50cd9e9caad84aaf", x: 250, y: 600 },
-{ key: "instagram", kind: "link", label: "Instagram", img: "assets/img/ic-instagram.jpg", brand: true, url: "https://www.instagram.com/tahmuresy/", x: 332, y: 600 },
-{ key: "youtube", kind: "link", label: "YouTube", img: "assets/img/ic-youtube.svg", brand: true, url: "https://www.youtube.com/@tahmuresgh5377", x: 414, y: 600 },
-{ key: "facebook", kind: "link", label: "Facebook", img: "assets/img/ic-facebook.png", brand: true, url: "https://www.facebook.com/tahmures.gh", x: 496, y: 600 },
-{ key: "linkedin", kind: "link", label: "LinkedIn", img: "assets/img/ic-linkedin.svg", brand: true, url: "https://www.linkedin.com/", x: 578, y: 600 },
-{ key: "recycle", kind: "win", label: "Recycle Bin", img: "assets/img/ic-recycle.png", x: -1, y: -1 }];
+// ── TOP-LEFT · system ─────────────────────────────────────────────
+{ key: "mycomputer", kind: "win", label: "My Computer", img: "assets/img/ic-mycomputer.png", anchor: "tl", ax: 28, ay: 22 },
+{ key: "recycle", kind: "win", label: "Recycle Bin", img: "assets/img/ic-recycle.png", anchor: "tl", ax: 28, ay: 120 },
+// ── TOP-LEFT (below system) · project folders + files ─────────────
+{ key: "projects", kind: "win", label: "My Projects", anchor: "tl", ax: 28, ay: 238 },
+{ key: "robotic", kind: "win", label: "Robotic_Fabrication.exe", anchor: "tl", ax: 128, ay: 238, preview: "assets/img/brick-laying.jpg", caption: "Robotic Fabrication", year: "2023" },
+{ key: "patent", kind: "win", label: "Jointless_Timber_Patent.pdf", anchor: "tl", ax: 28, ay: 334, preview: "assets/img/dome.jpg", caption: "Jointless Timber Patent", year: "2024" },
+{ key: "diagrid", kind: "win", label: "Diagrid Optimization (ARCC 2025)", anchor: "tl", ax: 128, ay: 334, preview: "assets/img/diagrid/hero.jpg", caption: "Diagrid Optimization", year: "2025" },
+{ key: "pickplace", kind: "win", label: "Robotic Pick & Place", anchor: "tl", ax: 28, ay: 430, preview: "assets/img/pp-hero.jpg", caption: "Robotic Pick & Place", year: "2023" },
+{ key: "golfpavilion", kind: "win", label: "Golf Club Pavilion", anchor: "tl", ax: 128, ay: 430, preview: "assets/img/golf/golf-hero.jpg", caption: "Golf Club Pavilion", year: "2024" },
+{ key: "activebending", kind: "win", label: "Active Bending (ARCC 2025)", anchor: "tl", ax: 28, ay: 526, preview: "assets/img/bending/hero.jpg", caption: "Active Bending Curved-Line Folding", year: "2025" },
+{ key: "rotegrity", kind: "win", label: "Rotegrity", anchor: "tl", ax: 128, ay: 526, preview: "assets/img/rotegrity/render-single.jpg", caption: "Rotegrity", year: "2019" },
+{ key: "newfolder", kind: "win", label: "New Folder", anchor: "tl", ax: 28, ay: 622 },
+// ── TOP-RIGHT · software (3-col grid) ─────────────────────────────
+{ key: "rhino", kind: "app", label: "Rhinoceros 5", img: "assets/img/app-rhino.png", anchor: "tr", ax: 300, ay: 22 },
+{ key: "illustrator", kind: "app", label: "Adobe Illustrator CS6", img: "assets/img/app-illustrator.png", anchor: "tr", ax: 204, ay: 22 },
+{ key: "photoshop", kind: "app", label: "Photoshop CS4", img: "assets/img/app-photoshop.png", anchor: "tr", ax: 108, ay: 22 },
+{ key: "lumion", kind: "app", label: "Lumion 6", img: "assets/img/app-lumion.png", anchor: "tr", ax: 300, ay: 118 },
+{ key: "sketchup", kind: "app", label: "SketchUp Pro 2015", img: "assets/img/app-sketchup.png", anchor: "tr", ax: 204, ay: 118 },
+{ key: "max3ds", kind: "app", label: "3ds Max 2014", img: "assets/img/app-3dsmax.png", anchor: "tr", ax: 108, ay: 118 },
+{ key: "keyshot", kind: "app", label: "KeyShot 6", img: "assets/img/app-keyshot.jpg", anchor: "tr", ax: 300, ay: 214 },
+{ key: "autocad", kind: "app", label: "AutoCAD 2012", img: "assets/img/app-autocad.png", anchor: "tr", ax: 204, ay: 214 },
+{ key: "revit", kind: "app", label: "Revit 2017", img: "assets/img/app-revit.png", anchor: "tr", ax: 108, ay: 214 },
+// ── TOP-RIGHT (own row) · games ───────────────────────────────────
+{ key: "dota2", kind: "app", label: "Dota 2", img: "assets/img/ic-dota2.png", brand: true, anchor: "tr", ax: 300, ay: 330 },
+{ key: "steam", kind: "app", label: "Steam", img: "assets/img/ic-steam-new.webp", brand: true, anchor: "tr", ax: 204, ay: 330 },
+{ key: "cs16", kind: "app", label: "Counter-Strike 1.6", img: "assets/img/ic-cs-new.png", brand: true, anchor: "tr", ax: 108, ay: 330 },
+// ── BOTTOM-RIGHT · social links (one row) ─────────────────────────
+{ key: "linkedin", kind: "link", label: "LinkedIn", img: "assets/img/ic-linkedin.svg", brand: true, url: "https://www.linkedin.com/", anchor: "br", ax: 104, ay: 122 },
+{ key: "facebook", kind: "link", label: "Facebook", img: "assets/img/ic-facebook.png", brand: true, url: "https://www.facebook.com/tahmures.gh", anchor: "br", ax: 200, ay: 122 },
+{ key: "youtube", kind: "link", label: "YouTube", img: "assets/img/ic-youtube.svg", brand: true, url: "https://www.youtube.com/@tahmuresgh5377", anchor: "br", ax: 296, ay: 122 },
+{ key: "instagram", kind: "link", label: "Instagram", img: "assets/img/ic-instagram.jpg", brand: true, url: "https://www.instagram.com/tahmuresy/", anchor: "br", ax: 392, ay: 122 },
+{ key: "spotify", kind: "link", label: "Spotify", img: "assets/img/ic-spotify.jpg", brand: true, url: "https://open.spotify.com/user/31ggydruftgxouqt7d2nobfpxohq?si=50cd9e9caad84aaf", anchor: "br", ax: 488, ay: 122 }];
 
 
 let Z = 10;
@@ -249,10 +261,16 @@ function StartMenu({ onPick, onClose, onLogoff, avatar }) {
           )}
           <div className="sm-sep"></div>
           <div className="sm-item" onClick={() => onPick("diagrid")}>
-            <span className="sm-item__ico">{II.Diagrid()}</span><div><b>Diagrid Optimization</b><small>ARCC 2025</small></div>
+            <span className="sm-item__ico">{II.Folder()}</span><div><b>Diagrid Optimization</b><small>ARCC 2025</small></div>
           </div>
           <div className="sm-item" onClick={() => onPick("golfpavilion")}>
             <span className="sm-item__ico">{II.Folder()}</span><div><b>Golf Club Pavilion</b><small>2nd Place · IASS 2024</small></div>
+          </div>
+          <div className="sm-item" onClick={() => onPick("activebending")}>
+            <span className="sm-item__ico">{II.Folder()}</span><div><b>Active Bending Curved-Line Folding</b><small>ARCC 2025</small></div>
+          </div>
+          <div className="sm-item" onClick={() => onPick("rotegrity")}>
+            <span className="sm-item__ico">{II.Folder()}</span><div><b>Rotegrity</b><small>Nexorade sphere · 2019</small></div>
           </div>
         </div>
         <div className="startmenu__col startmenu__col--right">
@@ -331,6 +349,45 @@ function HoverPreview({ data }) {
 
 }
 
+/* ---- "play with the logo?" confirm dialog ------------------------- */
+function PlayPrompt({ onPlay, onCancel }) {
+  uE(() => {
+    const onKey = (e) => { if (e.key === "Escape") onCancel(); if (e.key === "Enter") onPlay(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onPlay, onCancel]);
+  const EI = window.Dialogs && window.Dialogs.ErrorIcon;
+  return (
+    <React.Fragment>
+      <div className="dlg-veil" onPointerDown={(e) => { e.stopPropagation(); onCancel(); }}></div>
+      <div className="dlg dlg--center" style={{ zIndex: 100000 }} onPointerDown={(e) => e.stopPropagation()}>
+        <div className="win__titlebar">
+          <span className="win__icon">{window.Icons && window.Icons.MyComputer ? window.Icons.MyComputer() : null}</span>
+          <span className="win__title">Tahmures.exe</span>
+          <div className="win__btns">
+            <div className="tbtn tbtn--close" title="Close" onClick={onCancel}>
+              <svg viewBox="0 0 10 10"><path d="M1 1l8 8M9 1l-8 8" stroke="#fff" strokeWidth="1.8" /></svg>
+            </div>
+          </div>
+        </div>
+        <div className="dlg__inner">
+          <div className="dlg__body">
+            <div className="dlg__ico">{EI ? <EI type="info" /> : null}</div>
+            <div className="dlg__msg">
+              <div><b>Do you want to play with the logo?</b></div>
+              <div style={{ height: 8 }}></div>
+              <div>The logo will come to life as a set of 3D blocks. Grab any piece and drag it anywhere on the desktop.</div>
+            </div>
+          </div>
+          <div className="dlg__btns">
+            <button className="xp-btn" autoFocus onClick={onPlay}>Play</button>
+            <button className="xp-btn" onClick={onCancel}>Cancel</button>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>);
+}
+
 /* ---- Desktop (root of the OS) ------------------------------------- */
 function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   const api = useWindows();
@@ -338,30 +395,35 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   const [preview, setPreview] = uS(null);
   const [startOpen, setStartOpen] = uS(false);
   const [launches, setLaunches] = uS([]);
-  // the painted-logo → live-3D swap: false until the timer fires, then live forever
+  // the painted-logo → live-3D swap: false until the user clicks the logo and
+  // confirms the prompt, then live forever
   const [swapped, setSwapped] = uS(false);
+  const [askPlay, setAskPlay] = uS(false);
   const lkey = uR(0);
   const logoMode = tweaks.wallStyle === 'logo';
   const calibrating = !!(window.Logo3D && window.Logo3D.CALIBRATE);
   const II = window.Icons;
 
-  // scattered icon positions, persisted to localStorage
+  // corner-anchored icon positions, persisted to localStorage
   const [positions, setPositions] = uS(() => {
     const base = {};
+    const vw = window.innerWidth, vh = window.innerHeight;
     DESK_ITEMS.forEach((it) => {
-      base[it.key] = it.key === "recycle" ?
-      { x: window.innerWidth - 104, y: window.innerHeight - 150 } :
-      { x: it.x, y: it.y };
+      let x, y;
+      if (it.anchor === "tr") { x = vw - it.ax; y = it.ay; }
+      else if (it.anchor === "br") { x = vw - it.ax; y = vh - it.ay; }
+      else { x = it.ax; y = it.ay; }
+      base[it.key] = { x: Math.max(0, x), y: Math.max(0, y) };
     });
     try {
-      const saved = JSON.parse(localStorage.getItem("jrl_icons") || "{}");
+      const saved = JSON.parse(localStorage.getItem("jrl_icons_v4") || "{}");
       Object.keys(saved).forEach((k) => {if (base[k]) base[k] = saved[k];});
     } catch (e) {}
     return base;
   });
   const moveIcon = uCB((key, x, y) => setPositions((p) => {
     const np = { ...p, [key]: { x, y } };
-    try {localStorage.setItem("jrl_icons", JSON.stringify(np));} catch (e) {}
+    try {localStorage.setItem("jrl_icons_v4", JSON.stringify(np));} catch (e) {}
     return np;
   }), []);
 
@@ -378,16 +440,13 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   // expose opener so boot/login deep-links could use it
   uE(() => {window.__openWin = api.open;window.__launchApp = launchApp;}, [api.open, launchApp]);
 
-  // The invisible swap: show the painted-logo wallpaper, then after 3s fade the
-  // without-logo wallpaper in (erasing the painted mark) AND fade the live 3D
-  // canvas in at the same instant — so the painted logo appears to come alive in
-  // place. From then on it stays live forever. In CALIBRATE mode we never swap
-  // (the painted logo stays visible so the 3D model can be lined up over it).
-  uE(() => {
-    if (!logoMode || calibrating) return;
-    const timer = setTimeout(() => setSwapped(true), 3000);
-    return () => clearTimeout(timer);
-  }, [logoMode, calibrating]);
+  // The swap is now triggered by the user: clicking the painted logo opens a
+  // prompt; "Play" fades the without-logo wallpaper in (erasing the painted
+  // mark) AND fades the live 3D canvas in at the same instant — so the painted
+  // logo appears to come alive in place. From then on it stays live forever. In
+  // CALIBRATE mode we never swap (the painted logo stays visible so the 3D model
+  // can be lined up over it).
+  const startPlay = uCB(() => { setAskPlay(false); setSwapped(true); }, []);
 
   return (
     <div className="desktop" onPointerDown={() => {setSel(null);setPreview(null);}}>
@@ -400,15 +459,9 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
       {tweaks.wallStyle === 'memphis' &&
       <div className="desktop__memphis" style={{ backgroundImage: "url('assets/img/brand-memphis.png')" }}></div>}
 
-      {/* logo-swap wallpaper: base = WITH the painted logo; the WITHOUT-logo copy
-          sits above it (below the icons) and fades in at the swap moment, which
-          erases the painted logo — everything else in the two images is identical,
-          so nothing appears to change except the mark turning 3D. */}
+      {/* logo wallpaper — the painted Bliss + logo plate */}
       {logoMode &&
-      <React.Fragment>
-        <div className="desktop__wall--logo" style={{ backgroundImage: "url('assets/img/with-logo.png')" }}></div>
-        <div className={"desktop__wall--nologo" + (swapped ? " is-on" : "")} style={{ backgroundImage: "url('assets/img/without-logo.png')" }}></div>
-      </React.Fragment>}
+      <div className="desktop__wall--logo" style={{ backgroundImage: "url('assets/img/bliss-logo.jpg')" }}></div>}
 
       {!logoMode && <div className="desktop__vignette"></div>}
 
@@ -433,12 +486,6 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
       onClose={() => closeLaunch(l.key)} onFocus={() => focusLaunch(l.key)} />
       )}
 
-      {/* live 3D logo — mounts with the desktop so the model preloads during the
-          3s window, then fades in (active) once the swap fires; stays live. The
-          canvas is pointer-events:none until the cursor is over a piece, so icons,
-          windows and the taskbar all stay usable. */}
-      {logoMode && window.Logo3D &&
-      <window.Logo3D.Playground src="assets/models/logo3.glb" active={swapped} />}
 
       {/* start menu */}
       {startOpen && <StartMenu avatar={avatar}
