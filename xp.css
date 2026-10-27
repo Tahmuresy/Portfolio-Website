@@ -734,9 +734,12 @@ html, body {
     box-shadow:0 -8px 18px rgba(0,0,0,.16);
   }
   .taskbar > * { height:var(--tb-h); }
+  /* the button image has white corners and a white bottom row: size the box
+     to the image (minus that row) and clip it to the pill's elliptical ends */
   .startbtn {
-    width:calc(var(--tb-h) * 3.05); height:var(--tb-h); margin:0 2px 0 0; flex:none;
-    background:url(assets/start-button-m.png) no-repeat left center/auto 100%;
+    width:calc(var(--tb-h) * 240 / 73); height:var(--tb-h); margin:0 2px 0 0; flex:none;
+    background:url(assets/start-button.png) no-repeat -2.5px -1px / calc(100% + 5px) auto;
+    border-radius:10px / 50%;
   }
   .taskbar__quick { display:none; }
   .taskbar__tasks { padding:3px 4px; gap:4px; overflow-x:auto; scrollbar-width:none; }
@@ -813,7 +816,7 @@ html, body {
    its middle lines up exactly with where the desktop layer used to paint it. */
 @media (max-width: 760px) and (orientation: portrait) {
   html.m-wall {
-    background:#39724d url(assets/img/bliss-logo-tall.jpg) no-repeat center center / auto 141.667% !important;
+    background:#39724d url(bliss-logo-tall.jpg) no-repeat center center / auto 141.667% !important;
   }
   html.m-wall .desktop__wall--logo { display:none; }
 }
