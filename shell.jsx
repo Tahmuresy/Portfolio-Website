@@ -97,6 +97,9 @@ const PHONE_HOME = [
   ["pickplace", "Pick & Place"], ["patent", "JRL Patent"], ["diagrid", "Diagrid"], ["golfpavilion", "Golf Pavilion"], ["activebending", "Active Bending"],
   ["rotegrity", "Rotegrity"], ["tabriz", "Tabriz Audio"], ["robotic", "Robotic Fab"], ["newfolder", "New Folder"], ["recycle", "Recycle Bin"]];
 
+// bottom-edge colour of windows whose content isn't white (shows under Safari's toolbar)
+const WIN_FLOOR = { robotic: "#0a0a12", patent: "#535353", housing: "#d9d4c2" };
+
 let Z = 10;
 
 function useWindows() {
@@ -488,6 +491,23 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   const closeLaunch = uCB((k) => setLaunches((p) => p.filter((l) => l.key !== k)), []);
   const focusLaunch = uCB((k) => setLaunches((p) => p.map((l) => l.key === k ? { ...l, z: ++Z } : l)), []);
   const openItem = uCB((it) => {setPreview(null);if (it.noClick) return;if (it.kind === "link") {window.open(it.url, "_blank", "noopener");} else if (it.kind === "app") launchApp(it.key);else api.open(it.key);}, [api.open, launchApp]);
+
+  // phones: the page root paints what shows under Safari's status bar and
+  // toolbar (see EDGE TO EDGE in xp.css) — the wallpaper on the home screen, or
+  // the title-bar blue (top) + the window's own colour (bottom) when one is open.
+  // Android Chrome's bar follows via theme-color.
+  uE(() => {
+    const root = document.documentElement;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const clear = () => { root.classList.remove("m-wall", "m-win"); root.style.removeProperty("--m-floor"); };
+    if (!phone) { clear(); return clear; }
+    const top = api.wins.filter((w) => !w.min).sort((a, b) => b.z - a.z)[0];
+    root.classList.toggle("m-win", !!top);
+    root.classList.toggle("m-wall", !top && logoMode);
+    if (top) root.style.setProperty("--m-floor", WIN_FLOOR[top.id] || "#ffffff");
+    if (meta) meta.setAttribute("content", top ? "#0a60e8" : "#5f9cf0");
+    return clear;
+  }, [phone, api.wins, logoMode]);
 
   // expose opener so boot/login deep-links could use it
   uE(() => {window.__openWin = api.open;window.__launchApp = launchApp;}, [api.open, launchApp]);
