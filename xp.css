@@ -638,20 +638,16 @@ html, body {
   .only-desk { display:none !important; }
   .only-phone { display:inline; }
 
-  /* EDGE TO EDGE. iOS Safari never draws position:fixed content under its
-     status bar or floating toolbar — it paints a flat colour there instead.
-     Ordinary page content does run underneath, so on phones the desktop and
-     taskbar are plain absolute content, and the WALLPAPER is painted by the
-     page root (html), from a taller copy with extra sky and grass, so real
-     picture continues under both bars. With a window open the root switches
-     to the title-bar blue on top and the window's own colour at the bottom. */
-  html, body { background-color:var(--frame) !important; overscroll-behavior:none; }
-  .desktop { position:absolute; background-color:transparent; }
+  /* EDGE TO EDGE. iOS Safari won't draw position:fixed things, or the page
+     background image, under its status bar / floating toolbar — it fills those
+     strips with a flat colour. It DOES draw ordinary page content there. So on
+     phones nothing on the desktop is fixed, and .mwall — a real element holding
+     a taller copy of the wallpaper — physically reaches past the top and bottom
+     of the screen, under both bars. With a window open, .mwall shows the
+     title-bar blue above and the window's own colour below instead. */
+  html, body { background-color:#5f9cf0 !important; overscroll-behavior:none; }
+  .desktop { position:absolute; background:transparent; overflow:visible; }
   .taskbar { position:absolute; }
-  html.m-win {
-    background:linear-gradient(180deg, var(--xp-title-a) 0 50%, var(--m-floor, #fff) 50% 100%) no-repeat center / 100% 300% !important;
-  }
-  html.m-wall body, html.m-win body { background:transparent !important; }
 
   /* ---- home screen: 5-up icon grid, tap to open ---- */
   .mhome {
@@ -810,13 +806,19 @@ html, body {
   .dlg__btns .xp-btn { min-height:38px; font-size:13px; }
 }
 
-/* phone, portrait: the root carries the (taller) wallpaper so it continues
-   under Safari's status bar and toolbar. The image is the normal wallpaper
-   with 320px of soft sky above and grass below (out of 1536), so at this size
-   its middle lines up exactly with where the desktop layer used to paint it. */
+/* the over-sized wallpaper element (see EDGE TO EDGE). bliss-logo-tall.jpg is
+   the normal wallpaper plus 320px of soft sky above and grass below (out of
+   1536), so reaching 20.834% past each edge puts its middle exactly where the
+   regular wallpaper sits, and the extra sky/grass lands under the bars. */
+.mwall { display:none; }
 @media (max-width: 760px) and (orientation: portrait) {
-  html.m-wall {
-    background:#39724d url(bliss-logo-tall.jpg) no-repeat center center / auto 141.667% !important;
+  .mwall {
+    display:block; position:absolute; left:0; right:0; top:-20.834%; bottom:-20.834%;
+    z-index:0; pointer-events:none;
+    background:#39724d url(bliss-logo-tall.jpg) no-repeat center center / auto 100%;
   }
-  html.m-wall .desktop__wall--logo { display:none; }
+  .desktop__wall--logo { display:none; }
+  html.m-win .mwall {
+    background:linear-gradient(180deg, var(--xp-title-a) 0 50%, var(--m-floor, #fff) 50% 100%);
+  }
 }

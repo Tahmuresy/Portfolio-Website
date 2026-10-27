@@ -492,22 +492,20 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   const focusLaunch = uCB((k) => setLaunches((p) => p.map((l) => l.key === k ? { ...l, z: ++Z } : l)), []);
   const openItem = uCB((it) => {setPreview(null);if (it.noClick) return;if (it.kind === "link") {window.open(it.url, "_blank", "noopener");} else if (it.kind === "app") launchApp(it.key);else api.open(it.key);}, [api.open, launchApp]);
 
-  // phones: the page root paints what shows under Safari's status bar and
-  // toolbar (see EDGE TO EDGE in xp.css) — the wallpaper on the home screen, or
-  // the title-bar blue (top) + the window's own colour (bottom) when one is open.
-  // Android Chrome's bar follows via theme-color.
+  // phones: .mwall (xp.css) runs the wallpaper under Safari's bars; with a
+  // window open it shows the title-bar blue above and the window's own colour
+  // below instead. Android Chrome's bar follows via theme-color.
   uE(() => {
     const root = document.documentElement;
     const meta = document.querySelector('meta[name="theme-color"]');
-    const clear = () => { root.classList.remove("m-wall", "m-win"); root.style.removeProperty("--m-floor"); };
+    const clear = () => { root.classList.remove("m-win"); root.style.removeProperty("--m-floor"); };
     if (!phone) { clear(); return clear; }
     const top = api.wins.filter((w) => !w.min).sort((a, b) => b.z - a.z)[0];
     root.classList.toggle("m-win", !!top);
-    root.classList.toggle("m-wall", !top && logoMode);
     if (top) root.style.setProperty("--m-floor", WIN_FLOOR[top.id] || "#ffffff");
     if (meta) meta.setAttribute("content", top ? "#0a60e8" : "#5f9cf0");
     return clear;
-  }, [phone, api.wins, logoMode]);
+  }, [phone, api.wins]);
 
   // expose opener so boot/login deep-links could use it
   uE(() => {window.__openWin = api.open;window.__launchApp = launchApp;}, [api.open, launchApp]);
@@ -522,6 +520,7 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
 
   return (
     <div className="desktop" onPointerDown={() => {setSel(null);setPreview(null);}}>
+      {phone && <div className="mwall" aria-hidden="true"></div>}
       <div className="desktop__wall" style={{ background: tweaks.wallStyle === 'solid' ?
         'radial-gradient(120% 90% at 50% 8%, #4f74cf 0%, #34529f 60%, #24397a 100%)' : undefined, backgroundSize: "cover", backgroundPosition: "center center", opacity: "0.1" }}></div>
       {tweaks.wallStyle === 'bliss' && wallpaper &&
