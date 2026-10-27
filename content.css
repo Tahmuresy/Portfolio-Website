@@ -526,3 +526,16 @@
 @media (max-width:620px) {
   .tz-gallery--renders { grid-template-columns:1fr; }
 }
+
+/* ====================================================================
+   MONDRIAN GENERATOR — live web app inside an XP window (apps9.jsx)
+   ==================================================================== */
+.mg-app { flex:1; min-height:0; display:flex; flex-direction:column; background:#ECE9D8; }
+.mg-bar { display:flex; align-items:center; gap:8px; padding:4px 6px; border-bottom:1px solid #a7a6a0; font:11px Tahoma, "Segoe UI", sans-serif; }
+.mg-bar__lbl { color:#555; }
+.mg-bar__url { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:#fff; border:1px solid #7f9db9; padding:2px 6px; color:#222; }
+.mg-bar__btn { text-decoration:none; color:#000; white-space:nowrap; }
+.mg-frame { flex:1; min-height:0; width:100%; border:0; display:block; background:#F4F2EE; }
+/* the iframe must not swallow pointer events while a window is moved/resized,
+   and an inactive window's first click should focus the window, not draw */
+.win.is-dragging .mg-frame, .win.is-inactive .mg-frame, body.is-resizing .mg-frame { pointer-events:none; }

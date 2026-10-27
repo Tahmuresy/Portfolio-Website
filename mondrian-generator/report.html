@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intent-Preserving Completion of Non-Expert Sketches — Tahmures Ghiyasi</title>
+<meta name="description" content="Technical report: a learned stroke recogniser and fidelity-aware completion that turn non-expert sketches into Mondrian-style compositions. 96.4% accuracy on held-out human drawings.">
+<meta name="author" content="Tahmures Ghiyasi">
+<meta property="og:title" content="Intent-Preserving Completion of Non-Expert Sketches">
+<meta property="og:description" content="Technical report behind the Mondrian Generator — Tahmures Ghiyasi.">
+<meta property="og:image" content="og-image.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--paper:#F3F1EC;--panel:#FCFBF8;--ink:#141414;--ink-2:#3F3C37;--muted:#6B665E;--rule:#E1DDD3;--red:#D12A1F;--blue:#1D4F9B;--yellow:#F1C232;
+  --font:"Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;color:var(--ink);font:16.5px/1.65 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--ink)}
+.top{position:sticky;top:0;z-index:5;background:rgba(243,241,236,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.top-in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:13.5px}
+.top a{text-decoration:none}
+.top .home{color:var(--muted)}
+.top .home:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#FCFBF8!important;padding:9px 16px;font-weight:600;font-size:13.5px;text-decoration:none}
+.btn:hover{background:#2C2B29}
+main{max-width:760px;margin:0 auto;padding:56px 24px 96px}
+.eyebrow{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.08;letter-spacing:-.025em;margin:14px 0 18px;font-weight:700}
+.byline{color:var(--muted);font-size:14px;margin-bottom:28px}
+.byline b{color:var(--ink)}
+.abstract{font-size:18.5px;line-height:1.6;color:var(--ink-2);border-left:3px solid var(--ink);padding-left:18px;margin:0 0 32px}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0 0 40px}
+.key{background:var(--panel);padding:18px 18px 16px}
+.key b{display:block;font-size:28px;letter-spacing:-.02em;line-height:1.1}
+.key span{display:block;font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4}
+.key i{display:block;width:18px;height:4px;margin-bottom:12px}
+h2{font-size:24px;letter-spacing:-.015em;margin:56px 0 14px;padding-top:18px;border-top:1px solid var(--ink)}
+h3{font-size:17px;margin:32px 0 8px}
+p,li{color:var(--ink-2)}
+strong{color:var(--ink)}
+ul,ol{padding-left:22px}
+li{margin:6px 0}
+code{font:14px var(--mono);background:#ECE9E2;padding:1px 5px}
+pre{background:var(--ink);color:#F2EFE7;padding:18px 20px;overflow-x:auto;font-size:13.5px;line-height:1.55}
+pre code{background:none;color:inherit;padding:0}
+table{width:100%;border-collapse:collapse;margin:18px 0 8px;font-size:14px;font-variant-numeric:tabular-nums;display:block;overflow-x:auto}
+th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--ink)}
+.fig{margin:40px -80px 8px}
+.panels{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.panels .art{background:#fff;box-shadow:0 1px 1px rgba(20,20,20,.06),0 12px 28px rgba(20,20,20,.12)}
+.panels svg{display:block;width:100%;height:auto}
+.panels p{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.4}
+.panels p b{color:var(--ink)}
+figcaption{font-size:14px;color:var(--ink-2);margin:20px 80px 0;line-height:1.55}
+.cta{margin-top:64px;padding:28px;background:var(--ink);color:#F2EFE7;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.cta p{color:#F2EFE7;margin:0;font-size:18px;font-weight:600}
+.cta .btn{background:#F2EFE7;color:var(--ink)!important}
+footer{max-width:760px;margin:0 auto;padding:0 24px 48px;font-size:12.5px;color:var(--muted);line-height:1.7}
+@media (max-width:1000px){.fig{margin-left:0;margin-right:0}figcaption{margin:16px 0 0}}
+@media (max-width:640px){body{font-size:16px}main{padding:36px 18px 72px}.panels{grid-template-columns:1fr;gap:26px;max-width:420px;margin:0 auto}.abstract{font-size:17px}.top-in{padding:10px 16px}.top .home span{display:none}}
+@media print{.top,.cta{display:none}body{font-size:11pt}h2{break-after:avoid}.fig{break-inside:avoid;margin:24px 0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="home" href="/">← <span>Tahmures Ghiyasi</span></a>
+  <a class="btn" href="index.html">Open the generator →</a>
+</div></header>
+<main>
+  <span class="eyebrow">Technical report · Mondrian Generator</span>
+  <h1>Intent-Preserving Completion of Non-Expert Sketches into Neoplastic Compositions</h1>
+  <p class="byline"><b>Tahmures Ghiyasi</b> · October 2026</p>
+  <p class="abstract">A person with no painting experience draws a few rough strokes; the system must return a finished composition that obeys Mondrian's rules <em>and</em> still feels like theirs. This report describes a learned stroke recogniser validated on real human drawings, a structured translation of strokes into neoplastic constraints, and a completion objective that trades harmony against fidelity under a single user control — all running in the browser, and designed as the perception-and-planning layer for a human–robot painting system.</p>
+  <div class="keys">
+    <div class="key"><i style="background:var(--red)"></i><b>96.4%</b><span>strokes read correctly on 900 held-out human drawings (from 90.0%)</span></div>
+    <div class="key"><i style="background:var(--blue)"></i><b>46% → 0.2%</b><span>compositions with near-miss lines, after a new harmony term</span></div>
+    <div class="key"><i style="background:var(--yellow)"></i><b>5 → 47</b><span>harmony on a 6-mark sketch, via budget conditioning</span></div>
+    <div class="key"><i style="background:var(--ink)"></i><b>4.7 KB</b><span>model, running entirely in the browser in milliseconds</span></div>
+  </div>
+<h2>1. Problem</h2>
+<p>A non-expert draws a few rough strokes; the system must return a finished composition that (a) obeys neoplastic rules — only horizontals and verticals, primary colours and non-colours, balanced asymmetry — and (b) is recognisably <em>theirs</em>. These pull against each other: every correction that improves harmony erodes authorship. v1 handled this with one heuristic (bounding-box aspect ≥ 2.2 → line, else colour plane). It could not tell a box from a smudge, an L from a diagonal, or a re-traced line from two lines.</p>
+<p><strong>Contributions of v2</strong></p>
+<ol>
+<li>A learned gesture recogniser (line / path / outline / fill / dot) trained on a synthetic non-expert noise model and validated on <strong>real human strokes</strong> (Google Quick, Draw!), with a dev/test protocol that keeps the test split untouched.</li>
+<li>Structured geometric decoding into neoplastic constraints, including an explicit, art-historically motivated treatment of diagonals.</li>
+<li>A <strong>fidelity-aware completion objective</strong> that trades harmony against faithfulness under one user-facing control (<em>Correction</em>), plus two generator fixes found during evaluation: <strong>budget conditioning</strong> and a <strong>near-miss penalty</strong>.</li>
+<li>A transparent, correctable interface: every mark shows its reading and confidence, and the user can override it with one tap. Each override is also a labelled example for future training.</li>
+</ol>
+<figure class="fig"><div class="panels"><div><div class="art"><svg viewBox="0 0 1000 1000" role="img" xmlns="http://www.w3.org/2000/svg"><rect width="1000" height="1000" fill="#F2EFE7"/><polyline points="90,370 129,380 170,382 179,379 198,378 225,372 230,373 249,369 257,370 259,366 264,368 305,369 337,378 346,378 350,383 370,387 413,403 416,399 440,404 463,403 468,400 476,401 509,393 524,392 532,389 555,388 563,385 572,387 577,385 601,390 611,390 628,393 642,399 705,411 710,409 717,412 721,409 739,409 763,406 811,392 830,390 835,386 845,384 850,386 857,382 912,388 921,376" fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="279,80 281,90 283,101 284,111 287,121 290,130 292,140 296,147 294,155 297,165 298,175 303,183 300,190 297,199 303,207 304,215 302,225 301,234 302,243 303,252 303,262 302,272 303,282 302,290 302,299 304,309 301,318 304,327 302,335 307,343 307,354 306,364 311,373 312,383 313,393 318,401 317,409 318,417 320,427 322,437 325,447 326,457 326,466 327,473 328,478 328,486 329,495 328,505 325,515 326,523 329,530 327,539 325,548 323,558 324,567 320,576 321,586 317,593 317,603 317,613 314,622 315,632 313,642 311,650 312,659 312,667 311,677 311,687 312,696 313,705 314,712 313,720 312,728 314,738 315,748 313,755 314,765 313,775 313,785 312,796 312,805 309,813 309,823 310,833 304,840 303,848 301,856 300,864 298,873 296,883 298,891 297,898 294,904 295,912 291,921 289,931" fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="560,576 572,575 585,574 597,575 609,573 621,571 633,572 646,570 654,569 665,569 675,570 685,567 697,569 706,566 716,565 727,564 739,565 751,562 763,563 775,560 788,561 799,560 812,558 824,557 837,558 848,557 853,569 852,581 852,593 852,606 851,616 851,627 851,639 849,648 850,660 850,673 848,685 848,696 848,704 849,716 848,728 846,740 847,753 847,765 847,777 847,790 848,802 847,813 847,825 841,831 829,830 823,831 810,832 798,830 786,831 774,832 762,833 749,832 737,831 725,834 712,833 700,832 687,833 676,832 664,835 653,831 642,830 631,831 619,832 606,831 594,830 581,829 569,827 562,829 562,817 565,805 566,794 564,782 564,770 566,758 567,746 565,734 564,722 564,711 564,698 565,686 562,674 562,662 562,650 559,638 559,626 556,614 555,601 554,592 553,582 551,570" fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="620,129 640,132 660,133 680,137 701,137 721,138 741,142 761,143 780,144 801,147 822,147 842,149 853,152 832,154 812,153 792,157 771,159 751,161 730,163 712,164 693,166 673,166 653,169 634,173 628,173 648,175 668,178 688,179 709,182 729,185 749,187 768,190 789,191 810,192 831,195 851,197 849,190 828,194 807,195 787,197 766,200 746,202 726,203 705,205 686,208 669,208 648,211 628,215 639,216 660,219 680,219 701,219 722,222 743,224 763,225 784,226 805,227 825,229 845,232 862,237 843,243 824,241 804,245 783,245 763,247 743,250 722,251 702,252 684,251 663,254 644,256 625,258 635,261 656,262 676,265 696,266 715,266 735,271 756,271 776,274 796,274 817,277 837,278 857,279 844,280 823,283 802,284 781,285 763,290 743,291 722,293 702,295 683,299 662,300 643,302 623,303" fill="none" stroke="#D12A1F" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="86,556 94,573 92,578 96,592 104,602 122,617 134,634 137,649 141,653 139,657 145,661 152,677 163,686 173,701 183,718 185,727 196,747 206,759 210,759 224,778 224,784 228,786 231,797 234,801 235,811 244,821" fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="150,180 150,180" fill="none" stroke="#1D4F9B" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="1"/></svg></div><p><b>a</b> What a visitor draws — six rough strokes</p></div><div><div class="art"><svg viewBox="0 0 1000 1000" role="img" xmlns="http://www.w3.org/2000/svg"><rect width="1000" height="1000" fill="#F2EFE7"/><polyline points="90,370 129,380 170,382 179,379 198,378 225,372 230,373 249,369 257,370 259,366 264,368 305,369 337,378 346,378 350,383 370,387 413,403 416,399 440,404 463,403 468,400 476,401 509,393 524,392 532,389 555,388 563,385 572,387 577,385 601,390 611,390 628,393 642,399 705,411 710,409 717,412 721,409 739,409 763,406 811,392 830,390 835,386 845,384 850,386 857,382 912,388 921,376" fill="none" stroke="#151515" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><polyline points="279,80 281,90 283,101 284,111 287,121 290,130 292,140 296,147 294,155 297,165 298,175 303,183 300,190 297,199 303,207 304,215 302,225 301,234 302,243 303,252 303,262 302,272 303,282 302,290 302,299 304,309 301,318 304,327 302,335 307,343 307,354 306,364 311,373 312,383 313,393 318,401 317,409 318,417 320,427 322,437 325,447 326,457 326,466 327,473 328,478 328,486 329,495 328,505 325,515 326,523 329,530 327,539 325,548 323,558 324,567 320,576 321,586 317,593 317,603 317,613 314,622 315,632 313,642 311,650 312,659 312,667 311,677 311,687 312,696 313,705 314,712 313,720 312,728 314,738 315,748 313,755 314,765 313,775 313,785 312,796 312,805 309,813 309,823 310,833 304,840 303,848 301,856 300,864 298,873 296,883 298,891 297,898 294,904 295,912 291,921 289,931" fill="none" stroke="#151515" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><polyline points="560,576 572,575 585,574 597,575 609,573 621,571 633,572 646,570 654,569 665,569 675,570 685,567 697,569 706,566 716,565 727,564 739,565 751,562 763,563 775,560 788,561 799,560 812,558 824,557 837,558 848,557 853,569 852,581 852,593 852,606 851,616 851,627 851,639 849,648 850,660 850,673 848,685 848,696 848,704 849,716 848,728 846,740 847,753 847,765 847,777 847,790 848,802 847,813 847,825 841,831 829,830 823,831 810,832 798,830 786,831 774,832 762,833 749,832 737,831 725,834 712,833 700,832 687,833 676,832 664,835 653,831 642,830 631,831 619,832 606,831 594,830 581,829 569,827 562,829 562,817 565,805 566,794 564,782 564,770 566,758 567,746 565,734 564,722 564,711 564,698 565,686 562,674 562,662 562,650 559,638 559,626 556,614 555,601 554,592 553,582 551,570" fill="none" stroke="#151515" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><polyline points="620,129 640,132 660,133 680,137 701,137 721,138 741,142 761,143 780,144 801,147 822,147 842,149 853,152 832,154 812,153 792,157 771,159 751,161 730,163 712,164 693,166 673,166 653,169 634,173 628,173 648,175 668,178 688,179 709,182 729,185 749,187 768,190 789,191 810,192 831,195 851,197 849,190 828,194 807,195 787,197 766,200 746,202 726,203 705,205 686,208 669,208 648,211 628,215 639,216 660,219 680,219 701,219 722,222 743,224 763,225 784,226 805,227 825,229 845,232 862,237 843,243 824,241 804,245 783,245 763,247 743,250 722,251 702,252 684,251 663,254 644,256 625,258 635,261 656,262 676,265 696,266 715,266 735,271 756,271 776,274 796,274 817,277 837,278 857,279 844,280 823,283 802,284 781,285 763,290 743,291 722,293 702,295 683,299 662,300 643,302 623,303" fill="none" stroke="#D12A1F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><polyline points="86,556 94,573 92,578 96,592 104,602 122,617 134,634 137,649 141,653 139,657 145,661 152,677 163,686 173,701 183,718 185,727 196,747 206,759 210,759 224,778 224,784 228,786 231,797 234,801 235,811 244,821" fill="none" stroke="#151515" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><polyline points="150,180 150,180" fill="none" stroke="#1D4F9B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><rect x="638.9" y="137.8" width="200.7" height="155.4" fill="#D12A1F" fill-opacity=".12" stroke="#D12A1F" stroke-width="5" stroke-dasharray="14 9"/><line x1="90.0" y1="388.6" x2="921.0" y2="388.6" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="555.3" y1="557.7" x2="852.0" y2="557.7" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="555.3" y1="832.7" x2="852.0" y2="832.7" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="86.0" y1="557.7" x2="244.0" y2="557.7" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="308.2" y1="80.0" x2="308.2" y2="931.0" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="555.3" y1="557.7" x2="555.3" y2="832.7" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="852.0" y1="557.7" x2="852.0" y2="832.7" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><line x1="244.0" y1="557.7" x2="244.0" y2="821.0" stroke="#141414" stroke-width="6" stroke-dasharray="16 10"/><circle cx="150.0" cy="180.0" r="16" fill="none" stroke="#141414" stroke-width="5"/><rect x="98" y="326" width="78" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="107" y="350" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">LINE</text><rect x="287" y="36" width="78" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="296" y="60" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">LINE</text><rect x="568" y="532" width="123" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="577" y="556" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">OUTLINE</text><rect x="628" y="85" width="78" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="637" y="109" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">FILL</text><rect x="94" y="512" width="78" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="103" y="536" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">LINE</text><rect x="158" y="136" width="63" height="34" fill="#FCFBF8" stroke="#141414" stroke-width="2"/><text x="167" y="160" font-family="ui-monospace,Menlo,monospace" font-weight="700" font-size="20" fill="#141414">DOT</text></svg></div><p><b>b</b> How it is read — classes, snapped lines, regions</p></div><div><div class="art"><svg viewBox="0 0 1000 1000" role="img" xmlns="http://www.w3.org/2000/svg"><rect width="1000" height="1000" fill="#F2EFE7"/><rect x="0.0" y="0.0" width="308.2" height="388.6" fill="#1D4F9B"/><rect x="0.0" y="388.6" width="244.0" height="169.1" fill="#F2EFE7"/><rect x="0.0" y="557.7" width="244.0" height="442.3" fill="#F2EFE7"/><rect x="244.0" y="388.6" width="64.2" height="611.4" fill="#F2EFE7"/><rect x="308.2" y="0.0" width="691.8" height="137.8" fill="#F2EFE7"/><rect x="308.2" y="137.8" width="330.7" height="155.4" fill="#151515"/><rect x="638.9" y="137.8" width="200.7" height="155.4" fill="#D12A1F"/><rect x="839.5" y="137.8" width="160.5" height="155.4" fill="#1D4F9B"/><rect x="308.2" y="293.2" width="691.8" height="95.4" fill="#F2EFE7"/><rect x="308.2" y="388.6" width="691.8" height="169.1" fill="#F1C232"/><rect x="308.2" y="557.7" width="247.1" height="275.0" fill="#F2EFE7"/><rect x="555.3" y="557.7" width="296.7" height="275.0" fill="#F2EFE7"/><rect x="852.0" y="557.7" width="148.0" height="275.0" fill="#F2EFE7"/><rect x="308.2" y="832.7" width="691.8" height="167.3" fill="#F2EFE7"/><rect x="301.2" y="-7.0" width="14.0" height="1014.0" fill="#151515"/><rect x="-7.0" y="381.6" width="322.2" height="14.0" fill="#151515"/><rect x="301.2" y="381.6" width="705.8" height="14.0" fill="#151515"/><rect x="301.2" y="550.7" width="705.8" height="14.0" fill="#151515"/><rect x="301.2" y="825.7" width="705.8" height="14.0" fill="#151515"/><rect x="548.3" y="550.7" width="14.0" height="289.0" fill="#151515"/><rect x="845.0" y="550.7" width="14.0" height="289.0" fill="#151515"/><rect x="237.0" y="381.6" width="14.0" height="625.4" fill="#151515"/><rect x="-7.0" y="550.7" width="258.0" height="14.0" fill="#151515"/><rect x="301.2" y="130.8" width="705.8" height="14.0" fill="#151515"/><rect x="301.2" y="286.2" width="705.8" height="14.0" fill="#151515"/><rect x="631.9" y="130.8" width="14.0" height="169.4" fill="#151515"/><rect x="832.5" y="130.8" width="14.0" height="169.4" fill="#151515"/></svg></div><p><b>c</b> What the system paints</p></div></div><figcaption><b>Figure 1.</b> One pass of Draw &amp; Complete, produced by the shipped engine. Every stroke is recognised (line, outline, fill, dot), the diagonal is translated into an orthogonal step, and the completion keeps all six marks (fidelity 100/100, harmony 47/100).</figcaption></figure>
+<h2>2. Pipeline</h2>
+<pre><code>stroke ─► capture (4-unit motion threshold) ─► finalize (RDP ε=1.5, ≤96 pts)
+       ─► 16 features ─► MLP 16-24-5 ─► class + confidence   (user override wins)
+       ─► decode: line/path → ShortStraw corners → TLS fit per segment → axis snap (±25°)
+                  diagonal → orthogonal step;  outline → 4 cuts on robust bbox
+                  fill / colour stroke → region;  dot → plane pin
+all marks ─► consolidate: merge re-traces · align collinear segments · snap ends to
+             perpendicular lines/edges · absorb edge-huggers · snap regions to lines
+         ─► completion: N candidates, forced cuts first (budget-conditioned),
+             proposal mixture for regions, select argmin  D_harmony + λ(c)·L_fidelity
+</code></pre>
+<p>The interpreter (<code>interpreter.js</code>) is a single source file used by both the training pipeline and the web app. <code>build.js</code> inlines it into the page, so the features the model was trained on are byte-identical to the ones computed in the browser.</p>
+<h2>3. Features</h2>
+<p>All features are scale-invariant except <code>log_size</code>, which is needed to detect dots. Strokes are resampled to 64 equidistant points.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Captures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>log(bbox diagonal / canvas diagonal)</td>
+<td>absolute size (dots)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>log(path length / bbox diagonal)</td>
+<td>ink per extent (fills ≫ lines)</td>
+</tr>
+<tr>
+<td>3–4</td>
+<td>endpoint gap / length, / diagonal</td>
+<td>closure (outlines)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>bbox aspect</td>
+<td>elongation</td>
+</tr>
+<tr>
+<td>6–7</td>
+<td>TLS residual / diagonal; √(λ₂/λ₁)</td>
+<td>straightness</td>
+</tr>
+<tr>
+<td>8–9</td>
+<td>Σ|turning|/2π; |Σ turning|/2π</td>
+<td>wiggle vs. winding</td>
+</tr>
+<tr>
+<td>10</td>
+<td>ShortStraw interior corners</td>
+<td>paths</td>
+</tr>
+<tr>
+<td>11</td>
+<td>direction reversals along major axis</td>
+<td>overlapping passes (hatching)</td>
+</tr>
+<tr>
+<td>12</td>
+<td>6×6 occupancy of bbox</td>
+<td>coverage</td>
+</tr>
+<tr>
+<td>13</td>
+<td>convex-hull area / diagonal²</td>
+<td>enclosed area</td>
+</tr>
+<tr>
+<td>14</td>
+<td>max chord deviation / diagonal</td>
+<td>bow</td>
+</tr>
+<tr>
+<td>15</td>
+<td>self-intersections</td>
+<td>scribbles</td>
+</tr>
+<tr>
+<td>16</td>
+<td>direction reversals along <strong>minor</strong> axis</td>
+<td>oscillation while progressing (zigzag) — added after dev-split error analysis (§5)</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Data</h2>
+<p><strong>Synthetic training data</strong> (<code>synth.js</code>): 3,000 strokes per class plus 600 per class for validation, on a 1000-unit canvas. The generator covers lines (75% near an axis), L-corners, steps, zigzags, arcs, waves, rectangles drawn from any start point with rounded corners and closure gaps or overshoot, ellipses, triangles, hatching, random-walk and looping scribbles, taps and micro-squiggles. The noise model includes low-frequency perpendicular wobble, Gaussian jitter, pen-down/pen-up hooks, sag, small rotations and sampling dropout. Every stroke then goes through the app's exact capture pipeline. A <strong>shift</strong> set raises tremor 1.4–2.4×, dropout and rotation to test robustness.</p>
+<p><strong>Real data</strong> (<code>fetch_quickdraw.js</code>): recognised, single-stroke drawings from Quick, Draw! (CC BY 4.0). Mapping: <em>line</em> → line, <em>zigzag</em> → path, <em>circle / square / triangle</em> → outline. That gives 1,800 strokes, split by index into <strong>dev</strong> (900) and <strong>test</strong> (900). Drawings are randomly scaled and placed, then passed through the app's capture pipeline.</p>
+<p><strong>Protocol.</strong> All error analysis and the one model revision were done on dev only. Test was evaluated once, after the final model was fixed.</p>
+<h2>5. Results</h2>
+<p>Accuracy %, with 95% bootstrap CI (2,000 resamples). Full tables and confusion matrices: <code>results/results.md</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>iid synth</th>
+<th>shift synth</th>
+<th>real dev</th>
+<th><strong>real test</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1 heuristic (previous app)</td>
+<td>31.9</td>
+<td>31.2</td>
+<td>28.6</td>
+<td>28.4</td>
+</tr>
+<tr>
+<td>hand-tuned rules</td>
+<td>86.2</td>
+<td>77.0</td>
+<td>70.9</td>
+<td>71.4</td>
+</tr>
+<tr>
+<td>softmax regression</td>
+<td>98.7</td>
+<td>96.3</td>
+<td>92.9</td>
+<td>95.2</td>
+</tr>
+<tr>
+<td>MLP, gen v1, 15 features (ablation)</td>
+<td>97.7</td>
+<td>96.2</td>
+<td>88.1</td>
+<td>90.0 [88.1, 91.9]</td>
+</tr>
+<tr>
+<td><strong>MLP, gen v2, 16 features (final)</strong></td>
+<td><strong>99.6</strong></td>
+<td><strong>97.6</strong></td>
+<td><strong>94.4</strong></td>
+<td><strong>96.4 [95.1, 97.6]</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Sim-to-real gap and fix.</strong> Before the revision, the model scored 99% on synthetic data but only 88% on real dev strokes. Almost all of the gap was real zigzags read as <em>fill</em> (dev zigzag accuracy 68%). Inspecting dev showed two causes. First, real zigzags are much less elongated than the generator's (median aspect 0.62 vs ≤ 0.45). Second, the oscillation feature only measured the major axis. Widening the zigzag distribution and adding feature 16 raised held-out test zigzag accuracy from <strong>73.3% to 92.0%</strong>, and overall real-test accuracy from <strong>90.0% to 96.4%</strong>. The confidence intervals do not overlap.</li>
+<li><strong>Features carry most of the signal.</strong> Softmax regression on the same 16 features reaches 95.2% on real test. The MLP's gain over it is small. We keep the MLP because it is better on every split and its weights are only 4.7 KB.</li>
+<li><strong>Geometry.</strong> For synthetic lines drawn with horizontal or vertical intent (n = 818), the full pipeline picks the correct axis 100% of the time. Median position error is 0.3 units and p90 is 1.1 units on a 1000-unit canvas.</li>
+<li><strong>Completion fixes found during evaluation.</strong></li>
+<li><em>Near-miss jogs:</em> 229 of 500 compositions from the original generator contained parallel lines that nearly, but not exactly, align across a perpendicular — an arrangement Mondrian avoided. A penalty in the harmony score reduces this to <strong>1 of 500</strong>.</li>
+<li><em>Budget conditioning:</em> previously, every block created by a human line restarted the Mondrian process with the full budget, so many marks produced clutter. Each forced cut now consumes its block's expected cut time, E[t] = scale / (w + h). On a 6-mark scenario this changed the result from 24 planes, harmony 5, fidelity 83 to <strong>14 planes, harmony 47, fidelity 100</strong>.</li>
+<li><strong>Scenario tests</strong> (<code>scenarios.test.js</code>, 13 checks, all passing): wobbly cross plus scribble; box → plane with IoU 0.96; L-shape; diagonal → step; collinear alignment; re-trace merge; correction trade-off; tap pin; determinism; and an interactive budget (6 marks × 200 candidates in about 14 ms).</li>
+</ul>
+<h2>6. Completion objective</h2>
+<p>For each candidate partition <em>P</em>:</p>
+<p><strong>J(P) = D_harmony(P) + λ(c) · L_fid(P)</strong>, with <strong>λ(c) = 0.3 + 2.7·(1 − c)</strong>, where <em>c</em> ∈ [0, 1] is the <em>Correction</em> slider.</p>
+<ul>
+<li><strong>D_harmony:</strong> 0.9 × visible-area spread + 0.3 × near-congruent plane pairs + 0.5 × relative density misfit + 0.3 × near-miss jogs.</li>
+<li><strong>L_fid:</strong> Σ over colour regions of (1 − best plane IoU) + 0.25 × generated lines that near-miss a human line.</li>
+</ul>
+<p><em>c</em> also scales the consolidation tolerances (merge τ = (0.15 + 0.30c)·minCell; snap reach = (0.35 + 0.40c)·minCell).</p>
+<p><strong>Proposal mixture:</strong> odd-numbered candidates also force each region's edges as cuts, so the search space always contains planes that match a region exactly.</p>
+<p><strong>Reported Fidelity</strong> = mean of (human lines kept), (region IoUs) and (1 − 0.25 × near-misses).</p>
+<p><em>c</em> is a fixed, user-set analogue of the adaptability parameter α in bounded-memory mutual-adaptation models (Nikolaidis et al., 2017). Here the human sets it rather than the system inferring it.</p>
+<h2>7. Limitations (stated plainly)</h2>
+<ol>
+<li><strong>Training data is synthetic.</strong> Real strokes are used only for evaluation, and only for 3 of the 5 classes. <em>Fill</em> and <em>dot</em> have no Quick, Draw! analogue, so their accuracy is measured on synthetic data only.</li>
+<li><strong>Domain mismatch.</strong> Quick, Draw! strokes were made in a 20-second guessing game on mouse or touch, not with compositional intent on a canvas. Real Draw &amp; Complete strokes will differ.</li>
+<li><strong>Label ambiguity.</strong> Some "zigzag" drawings are geometrically indistinguishable from hatching. The remaining 8% zigzag error partly reflects the label, not the model.</li>
+<li><strong>Unvalidated metrics.</strong> <em>Harmony</em> is a hand-designed heuristic, not a learned or validated aesthetic measure. <em>Fidelity</em> is our own proxy for "it still feels like mine" and has not been validated against human judgement.</li>
+<li><strong>Single-stroke only.</strong> Gestures are recognised one stroke at a time. A box drawn as 4 strokes works through merging and snapping, not through recognition.</li>
+<li><strong>Robot not yet updated.</strong> The UR20 runtime still uses the v1 rule (<code>mondrian_generator.snap_marks</code>). It does not yet have this interpreter.</li>
+</ol>
+<h2>8. Next steps</h2>
+<ol>
+<li><strong>Collect real data with consent.</strong> Log strokes and chip corrections with opt-in consent. Every correction is a free label. Retrain with real data and use uncertainty sampling (chips below 60% confidence are already flagged with "?").</li>
+<li><strong>User study</strong> (pre-register). Within-subjects, N ≈ 24 non-experts. Conditions: v1 heuristic vs v2 at c = 0.2 vs v2 at c = 0.8, counterbalanced. Each participant completes 3 compositions per condition.
+   - Measures: perceived ownership and agency (Likert, adapted from the Sense of Agency Scale, Tapal et al., 2017); Creativity Support Index (Cherry &amp; Latulipe, 2014); blind aesthetic ratings by a separate panel; number of overrides; time.
+   - Analysis: mixed-effects models with participant as a random effect.
+   - Hypotheses: v2 beats v1 on ownership at equal aesthetic rating; <em>c</em> trades ownership against rated aesthetics.
+   - This study also validates (or refutes) <em>Fidelity</em> as a proxy.</li>
+<li><strong>Validate Harmony against Mondrian's own works.</strong> Encode public-domain Mondrian compositions as geometry and test whether Harmony ranks them above random partitions. If not, learn the score instead.</li>
+<li><strong>Robot parity.</strong> Skeletonise the Femto Mega canvas capture into polylines, then run the same interpreter on the Jetson (Node, or a Python port checked against <code>scenarios.test.js</code>).</li>
+</ol>
+<h2>References</h2>
+<ul>
+<li>Cherry, E., &amp; Latulipe, C. (2014). Quantifying the creativity support of digital tools through the Creativity Support Index. <em>ACM TOCHI</em>, 21(4).</li>
+<li>Douglas, D. H., &amp; Peucker, T. K. (1973). Algorithms for the reduction of the number of points required to represent a digitized line or its caricature. <em>Cartographica</em>, 10(2).</li>
+<li>Efron, B., &amp; Tibshirani, R. (1993). <em>An Introduction to the Bootstrap.</em> Chapman &amp; Hall.</li>
+<li>Ha, D., &amp; Eck, D. (2018). A neural representation of sketch drawings. <em>ICLR</em>.</li>
+<li>Igarashi, T., Matsuoka, S., Kawachiya, S., &amp; Tanaka, H. (1997). Interactive beautification: a technique for rapid geometric design. <em>UIST</em>.</li>
+<li>Jongejan, J., Rowley, H., Kawashima, T., Kim, J., &amp; Fox-Gieg, N. (2016). <em>The Quick, Draw! dataset.</em> Google Creative Lab, CC BY 4.0.</li>
+<li>Kingma, D. P., &amp; Ba, J. (2015). Adam: a method for stochastic optimization. <em>ICLR</em>.</li>
+<li>Nikolaidis, S., Hsu, D., &amp; Srinivasa, S. (2017). Human-robot mutual adaptation in collaborative tasks: models and experiments. <em>IJRR</em>, 36(5–7).</li>
+<li>Paulson, B., &amp; Hammond, T. (2008). PaleoSketch: accurate primitive sketch recognition and beautification. <em>IUI</em>.</li>
+<li>Roy, D. M., &amp; Teh, Y. W. (2008). The Mondrian process. <em>NeurIPS 21</em>.</li>
+<li>Tapal, A., Oren, E., Dar, R., &amp; Eitam, B. (2017). The Sense of Agency Scale. <em>Frontiers in Psychology</em>, 8.</li>
+<li>Wobbrock, J. O., Wilson, A. D., &amp; Li, Y. (2007). Gestures without libraries, toolkits or training: a $1 recognizer for user interface prototypes. <em>UIST</em>.</li>
+<li>Wolin, A., Eoff, B., &amp; Hammond, T. (2008). ShortStraw: a simple and effective corner finder for polylines. <em>SBIM</em>.</li>
+</ul>
+  <div class="cta"><p>Try it — draw a line.</p><a class="btn" href="index.html">Open the generator →</a></div>
+</main>
+<footer>© 2026 Tahmures Ghiyasi. Evaluation strokes from the Quick, Draw! dataset (Google Creative Lab, CC BY 4.0). After the work of Piet Mondrian (1872–1944); not affiliated with the Mondrian/Holtzman Trust.</footer>
+</body>
+</html>

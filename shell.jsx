@@ -19,7 +19,9 @@ const REG = {
   resume: { title: "My Résumé — WordPad", icon: "Notepad", comp: "Resume", w: 620, h: 540 },
   contact: { title: "Contact", icon: "Mail", comp: "Contact", w: 460, h: 400 },
   projects: { title: "My Projects", icon: "Folder", comp: "Projects", w: 580, h: 410 },
-  newfolder: { title: "New Folder", icon: "Folder", comp: "NewFolder", w: 540, h: 380 }
+  newfolder: { title: "New Folder", icon: "Folder", comp: "NewFolder", w: 540, h: 380 },
+  mondrian: { title: "Mondrian_Generator.exe", icon: "Mondrian", comp: "MondrianGenerator",
+    w: Math.max(640, Math.min(1180, window.innerWidth - 80)), h: Math.max(480, Math.min(780, window.innerHeight - 90)) }
 };
 const ICON = (name) => window.Icons[name] ? window.Icons[name]() : null;
 
@@ -34,6 +36,7 @@ const DESK_ITEMS = [
 // ── TOP-LEFT · system ─────────────────────────────────────────────
 { key: "mycomputer", kind: "win", label: "My Computer", img: "assets/img/ic-mycomputer.png", anchor: "tl", ax: 28, ay: 22 },
 { key: "recycle", kind: "win", label: "Recycle Bin", img: "assets/img/ic-recycle.png", anchor: "tl", ax: 28, ay: 120 },
+{ key: "mondrian", kind: "win", label: "Mondrian Generator", anchor: "tl", ax: 128, ay: 22, preview: "assets/img/mondrian-preview.jpg", caption: "Mondrian Generator — draw & complete", year: "2026" },
 // ── TOP-LEFT (below system) · project folders + files ─────────────
 { key: "projects", kind: "win", label: "My Projects", anchor: "tl", ax: 28, ay: 238 },
 { key: "robotic", kind: "win", label: "Robotic_Fabrication.exe", anchor: "tl", ax: 128, ay: 238, preview: "assets/img/brick-laying.jpg", caption: "Robotic Fabrication", year: "2023" },
@@ -78,6 +81,7 @@ let Z = 10;
 function useWindows() {
   const [wins, setWins] = uS([]);
   const open = uCB((id) => {
+    if (id === "mondrian" && window.innerWidth < 760) { window.location.href = "mondrian-generator/"; return; }
     setWins((prev) => {
       const ex = prev.find((w) => w.id === id);
       if (ex) return prev.map((w) => w.id === id ? { ...w, min: false, z: ++Z } : w);
@@ -137,6 +141,7 @@ function Win({ w, api, accent, radius }) {
   };
   const onResizeDown = (e) => {
     e.stopPropagation(); api.focus(w.id);
+    document.body.classList.add("is-resizing");
     const el = ref.current;
     const sx = e.clientX, sy = e.clientY, sw = w.w, sh = w.h;
     let lw = w.w, lh = w.h, raf = 0;
@@ -149,6 +154,7 @@ function Win({ w, api, accent, radius }) {
     const up = () => {
       if (raf) cancelAnimationFrame(raf);
       api.size(w.id, lw, lh);
+      document.body.classList.remove("is-resizing");
       window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up);
     };
     window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up);
@@ -235,6 +241,7 @@ function StartMenu({ onPick, onClose, onLogoff, avatar }) {
   }, []);
   const II = window.Icons;
   const left = [
+  ["mondrian", "Mondrian Generator", "draw a line · it paints the rest", II.Mondrian()],
   ["mycomputer", "My Computer", "browse skills + hardware", II.MyComputer()],
   ["robotic", "Robotic Fabrication", "HRC assembly terminal", II.Exe()],
   ["patent", "Jointless Timber Patent", "US 63/662,495", II.Pdf()],

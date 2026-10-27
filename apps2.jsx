@@ -336,6 +336,7 @@ A2.Contact = () => (
    ==================================================================== */
 A2.Projects = ({ open }) => {
   const items = [
+    ["mondrian","Mondrian_Generator.exe", I2.Mondrian ? I2.Mondrian() : I2.Exe()],
     ["pickplace","Robotic Pick & Place", I2.Folder()],
     ["golfpavilion","Golf Club Pavilion", I2.Folder()],
     ["diagrid","Diagrid Optimization (ARCC 2025)", I2.Folder()],
@@ -360,7 +361,7 @@ A2.Projects = ({ open }) => {
         </div>
         <div className="exp__panel">
           <div className="exp__panelhead">Details <span className="chev">▴</span></div>
-          <div className="exp__panelbody"><div className="info"><b>My Projects</b>8 items<br/><span style={{color:"#666"}}>selected research</span></div></div>
+          <div className="exp__panelbody"><div className="info"><b>My Projects</b>12 items<br/><span style={{color:"#666"}}>selected research</span></div></div>
         </div>
       </div>
       <div className="exp__main xp-scroll">
