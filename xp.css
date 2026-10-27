@@ -621,8 +621,140 @@ html, body {
   .hoverprev__plate, .hoverprev__cap { transition:opacity .12s ease-out; transform:none; }
 }
 
-/* phones: hide the software launcher icons (Rhino, Autodesk, Adobe, etc.) —
-   their top-right anchors pile onto the left column on narrow screens */
+/* =========================================================================
+   PHONE (≤760px) — the desktop becomes a home screen; windows become
+   full-screen sheets. Everything above this line is the desktop design and
+   is untouched; these rules only kick in on small screens.
+   ========================================================================= */
+.only-phone { display:none; }
+.mhome, .mdock { display:none; }
+
 @media (max-width: 760px) {
-  .dicon--software { display: none !important; }
+  :root { --tb-h:42px; }
+  .only-desk { display:none !important; }
+  .only-phone { display:inline; }
+
+  /* ---- home screen: 5-up icon grid, tap to open ---- */
+  .mhome {
+    position:absolute; left:0; right:0; top:0; z-index:5;
+    display:grid; grid-template-columns:repeat(5, 1fr); row-gap:6px;
+    padding:14px 6px 0;
+  }
+  .micon {
+    appearance:none; -webkit-appearance:none; background:none; border:0; margin:0;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    padding:7px 2px 6px; border-radius:10px;
+    font:inherit; color:#fff; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .12s ease, transform .12s ease;
+  }
+  .micon:active { background:rgba(10,36,106,.38); transform:scale(.96); }
+  .micon__img {
+    width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+    filter:drop-shadow(1px 2px 1px rgba(0,0,0,.45));
+  }
+  .micon__img img, .micon__img svg { width:100%; height:100%; object-fit:contain; }
+  .micon__label {
+    font-size:11px; line-height:1.2; text-align:center; max-width:100%;
+    text-shadow:0 1px 2px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.7);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* ---- social dock above the taskbar ---- */
+  .mdock {
+    position:absolute; left:10px; right:10px; bottom:calc(var(--tb-h) + 10px); z-index:5;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 12px; border-radius:16px;
+    background:rgba(16,34,96,.30);
+    -webkit-backdrop-filter:blur(12px) saturate(1.2); backdrop-filter:blur(12px) saturate(1.2);
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 6px 20px rgba(0,0,0,.22);
+  }
+  .mdock__a { width:38px; height:38px; display:flex; -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
+  .mdock__a:active { transform:scale(.9); }
+  .mdock__a img { width:100%; height:100%; object-fit:contain; border-radius:9px; box-shadow:0 1px 3px rgba(0,0,0,.35); background:#fff; }
+
+  /* ---- windows: full-screen sheets ---- */
+  .win, .win.is-max {
+    left:0 !important; top:0 !important;
+    width:100% !important; height:calc(100% - var(--tb-h)) !important;
+    min-width:0; min-height:0;
+    border:0; border-radius:0; padding:0; box-shadow:none;
+    animation:win-sheet .22s cubic-bezier(.22,.61,.36,1);
+  }
+  @keyframes win-sheet { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+  .win__titlebar, .win.is-max .win__titlebar {
+    height:44px; margin:0; border-radius:0; padding:0 6px 0 12px; gap:9px; cursor:default;
+  }
+  .win__icon { width:18px; height:18px; }
+  .win__title { font-size:14px; }
+  .win__btns { gap:6px; }
+  .tbtn { width:36px; height:30px; border-radius:4px; }
+  .tbtn--close { width:40px; }
+  .tbtn svg { width:11px; height:11px; }
+  .tbtn--max, .win__resize { display:none; }
+  .win__body { border:0; }
+  .win.is-inactive .win__titlebar { background:linear-gradient(180deg,var(--xp-title-b) 0%,var(--xp-title-a) 8%,var(--xp-title-a) 42%,var(--xp-title-c) 88%,var(--xp-title-edge) 100%); }
+  .win.is-inactive .win__title { color:#fff; }
+  .win__toolbar { min-height:34px; font-size:12px; padding:4px 12px; }
+
+  /* touch scrolling: no chunky XP scrollbars on phones */
+  .xp-scroll::-webkit-scrollbar { width:0; height:0; }
+  .xp-scroll { -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+
+  /* ---- taskbar ---- */
+  .taskbar { height:var(--tb-h); }
+  .startbtn { width:122px; height:var(--tb-h); margin-right:4px; flex:none; }
+  .taskbar__quick { display:none; }
+  .taskbar__tasks { padding:3px 4px; gap:4px; overflow-x:auto; scrollbar-width:none; }
+  .taskbar__tasks::-webkit-scrollbar { display:none; }
+  .taskbtn { height:32px; min-width:0; max-width:150px; flex:0 1 auto; font-size:12px; padding:0 9px; }
+  .taskbtn img, .taskbtn svg { width:17px; height:17px; }
+  .tray { padding:0 10px; }
+  .tray__ico { display:none; }
+  .tray__clock { font-size:12px; }
+
+  /* ---- start menu: full-width sheet, one scrolling column ---- */
+  .startmenu {
+    left:0; right:0; width:auto; bottom:calc(var(--tb-h) - 1px);
+    max-height:calc(100% - var(--tb-h) - 14px);
+    display:flex; flex-direction:column;
+    border-left:0; border-right:0; border-radius:12px 12px 0 0;
+  }
+  .startmenu__header { flex:none; height:62px; padding:0 16px; }
+  .startmenu__user { font-size:16px; }
+  .startmenu__body { flex:1; min-height:0; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .startmenu__col { width:100%; }
+  .startmenu__col--right { border-left:0; border-top:1px solid #aac4e8; box-shadow:inset 0 1px 0 #fff; }
+  .sm-item { min-height:48px; padding:6px 16px; gap:12px; font-size:14px; -webkit-tap-highlight-color:transparent; }
+  .sm-item small { font-size:12px; }
+  .sm-item__ico, .startmenu__col--right .sm-item__ico { width:28px; height:28px; }
+  .sm-item:active { background:#2f71d9; color:#fff; }
+  .sm-item:active small { color:#dce7fb; }
+  .startmenu__footer { flex:none; height:50px; padding:0 12px; }
+  .sm-foot { font-size:13px; padding:8px 10px; }
+
+  /* ---- boot + login ---- */
+  .boot__brand { flex-direction:column; align-items:center; gap:14px; margin-bottom:40px; text-align:center; }
+  .boot__logo { width:92px; height:92px; }
+  .boot__word { font-size:30px; }
+  .boot__foot { flex-direction:column; align-items:center; gap:6px; padding:0 20px; font-size:11px; text-align:center; }
+  .login__main { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; padding:24px 20px; }
+  .login__left { text-align:center; padding:0; }
+  .login__hint { margin:8px auto 0; }
+  .login__divider { width:62%; height:1px; }
+  .login__right { padding:0; max-width:100%; }
+  .login__tile {
+    max-width:100%; padding:12px 18px 12px 12px;
+    background:rgba(255,255,255,.14); box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);
+  }
+  .login__name { font-size:18px; }
+  .login__bottombar { height:56px; padding:0 18px; }
+  .login__msg { display:none; }
+
+  /* ---- dialogs ---- */
+  .dlg { max-width:calc(100vw - 24px); }
+  .dlg.dlg--center { width:calc(100vw - 32px); }
+  .dlg__msg { font-size:13px; }
+  .dlg__btns .xp-btn { min-height:38px; font-size:13px; }
 }

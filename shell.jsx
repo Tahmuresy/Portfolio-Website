@@ -76,9 +76,26 @@ const DESK_ITEMS = [
 { key: "researchgate", kind: "link", label: "ResearchGate", img: "assets/img/ic-researchgate.png", brand: true, url: "https://www.researchgate.net/profile/Tahmures-Ghiyasi?ev=hdr_xprf", anchor: "br", ax: 680, ay: 122 }];
 
 
-// software launchers (top-right grid) — hidden on phones via .dicon--software in xp.css
-const SOFTWARE_KEYS = new Set(["rhino", "illustrator", "photoshop", "lumion", "sketchup", "max3ds",
-  "keyshot", "autocad", "revit", "vscode", "vray", "karamba"]);
+/* ---- phone layout ---------------------------------------------------
+   At ≤760px the desktop switches to a curated home screen: a tidy icon grid
+   (tap to open), a social dock, and full-screen windows (see the PHONE
+   sections in xp.css / content.css). Software + game launchers are left off. */
+const PHONE_MQ = "(max-width: 760px)";
+window.isPhone = () => !!(window.matchMedia && window.matchMedia(PHONE_MQ).matches);
+function usePhone() {
+  const [p, setP] = uS(window.isPhone());
+  uE(() => {
+    const mq = window.matchMedia(PHONE_MQ), h = () => setP(mq.matches);
+    mq.addEventListener ? mq.addEventListener("change", h) : mq.addListener(h);
+    return () => mq.removeEventListener ? mq.removeEventListener("change", h) : mq.removeListener(h);
+  }, []);
+  return p;
+}
+// home-screen order + short labels (recruiter-first: CV and contact lead)
+const PHONE_HOME = [
+  ["resume", "Résumé"], ["contact", "Contact"], ["projects", "My Projects"], ["mycomputer", "My Computer"], ["mondrian", "Mondrian"],
+  ["pickplace", "Pick & Place"], ["patent", "JRL Patent"], ["diagrid", "Diagrid"], ["golfpavilion", "Golf Pavilion"], ["activebending", "Active Bending"],
+  ["rotegrity", "Rotegrity"], ["tabriz", "Tabriz Audio"], ["robotic", "Robotic Fab"], ["newfolder", "New Folder"], ["recycle", "Recycle Bin"]];
 
 let Z = 10;
 
@@ -121,7 +138,7 @@ function Win({ w, api, accent, radius }) {
   // Drag mutates the DOM directly during the gesture and commits to React
   // state only on release — so we don't reconcile every window each frame.
   const onTitleDown = (e) => {
-    if (w.max) return;
+    if (w.max || window.isPhone()) return;
     if (e.target.closest(".tbtn")) return;
     api.focus(w.id);
     const el = ref.current;
@@ -164,6 +181,18 @@ function Win({ w, api, accent, radius }) {
     window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up);
   };
 
+  // phones: a project folder scrolls as one column, so when a tap switches the
+  // folder view (breadcrumb changes, e.g. into "Design Files"), start at the top
+  const onBodyTap = () => {
+    if (!window.isPhone()) return;
+    const el = ref.current; if (!el) return;
+    const crumb = () => { const a = el.querySelector(".pp-addr"); return a ? a.textContent : null; };
+    const before = crumb();
+    setTimeout(() => {
+      if (crumb() !== before) { const sc = el.querySelector(".exp"); if (sc) sc.scrollTop = 0; }
+    }, 0);
+  };
+
   const style = w.max ?
   { left: 0, top: 0, width: "100%", height: "calc(100% - 30px)", zIndex: w.z, display: w.min ? "none" : "flex" } :
   { left: w.x, top: w.y, width: w.w, height: w.h, zIndex: w.z, display: w.min ? "none" : "flex" };
@@ -171,14 +200,14 @@ function Win({ w, api, accent, radius }) {
   return (
     <div ref={ref} className={"win" + (active ? "" : " is-inactive") + (w.max ? " is-max" : "")} style={style}
     onPointerDown={() => api.focus(w.id)}>
-      <div className="win__titlebar" onPointerDown={onTitleDown} onDoubleClick={() => api.toggleMax(w.id)}>
+      <div className="win__titlebar" onPointerDown={onTitleDown} onDoubleClick={() => { if (!window.isPhone()) api.toggleMax(w.id); }}>
         <span className="win__icon">{ICON(r.icon)}</span>
         <span className="win__title">{r.title}</span>
         <div className="win__btns">
           <div className="tbtn" title="Minimize" onClick={() => api.setMin(w.id, true)}>
             <svg viewBox="0 0 10 10"><rect x="1" y="7" width="8" height="2" fill="#fff" /></svg>
           </div>
-          <div className="tbtn" title="Maximize" onClick={() => api.toggleMax(w.id)}>
+          <div className="tbtn tbtn--max" title="Maximize" onClick={() => api.toggleMax(w.id)}>
             <svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#fff" strokeWidth="1.6" /><rect x="1" y="1" width="8" height="2.4" fill="#fff" /></svg>
           </div>
           <div className="tbtn tbtn--close" title="Close" onClick={() => api.close(w.id)}>
@@ -186,7 +215,7 @@ function Win({ w, api, accent, radius }) {
           </div>
         </div>
       </div>
-      <div className="win__body">
+      <div className="win__body" onClickCapture={onBodyTap}>
         {Comp ? <Comp open={api.open} /> : <div style={{ padding: 20 }}>missing: {r.comp}</div>}
       </div>
       {!w.max && <div className="win__resize" onPointerDown={onResizeDown}></div>}
@@ -195,7 +224,7 @@ function Win({ w, api, accent, radius }) {
 }
 
 /* ---- Desktop icon (draggable, free-scatter) ----------------------- */
-function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover, extraClass }) {
+function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover }) {
   const moved = uR(false);
   const ref = uR(null);
   const down = (e) => {
@@ -224,7 +253,7 @@ function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover, 
     window.addEventListener("pointermove", mv);window.addEventListener("pointerup", up);
   };
   return (
-    <div ref={ref} className={"dicon" + (selected ? " is-selected" : "") + (extraClass ? " " + extraClass : "")}
+    <div ref={ref} className={"dicon" + (selected ? " is-selected" : "")}
     style={{ left: pos.x, top: pos.y }}
     onPointerDown={down}
     onMouseEnter={() => { if (onHover && !moved.current) onHover(true); }}
@@ -413,6 +442,7 @@ function PlayPrompt({ onPlay, onCancel }) {
 /* ---- Desktop (root of the OS) ------------------------------------- */
 function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   const api = useWindows();
+  const phone = usePhone();
   const [sel, setSel] = uS(null);
   const [preview, setPreview] = uS(null);
   const [startOpen, setStartOpen] = uS(false);
@@ -487,18 +517,38 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
 
       {!logoMode && <div className="desktop__vignette"></div>}
 
-      {/* scattered, draggable desktop icons */}
-      {DESK_ITEMS.map((it) =>
+      {/* phone: curated home grid + social dock (tap to open) */}
+      {phone &&
+      <div className="mhome">
+        {PHONE_HOME.map(([key, label]) => {
+          const it = DESK_ITEMS.find((d) => d.key === key) || { key, kind: "win" };
+          return (
+            <button key={key} className="micon" onClick={() => openItem(it)}>
+              <span className="micon__img">{it.img ? <img src={it.img} alt="" className="nodrag" /> : ICON(REG[key].icon)}</span>
+              <span className="micon__label">{label}</span>
+            </button>);
+        })}
+      </div>}
+      {phone &&
+      <nav className="mdock" aria-label="Links">
+        {DESK_ITEMS.filter((it) => it.kind === "link").map((it) =>
+        <a key={it.key} className="mdock__a" href={it.url} target="_blank" rel="noopener" aria-label={it.label} title={it.label}>
+          <img src={it.img} alt="" className="nodrag" />
+        </a>
+        )}
+      </nav>}
+
+      {/* desktop: scattered, draggable desktop icons */}
+      {!phone && DESK_ITEMS.map((it) =>
       <DIcon key={it.key}
       icon={it.img ? <img src={it.img} alt="" className={"nodrag" + (it.brand ? " brand" : "")} /> : ICON(REG[it.key].icon)}
       label={it.label} pos={positions[it.key]} selected={sel === it.key}
-      extraClass={SOFTWARE_KEYS.has(it.key) ? "dicon--software" : ""}
       onSelect={() => setSel(it.key)} onOpen={() => openItem(it)}
       onHover={it.preview ? (on) => setPreview(on ? it : null) : null}
       onMove={(x, y) => moveIcon(it.key, x, y)} />
       )}
 
-      <HoverPreview data={preview} />
+      {!phone && <HoverPreview data={preview} />}
 
       {/* windows */}
       {api.wins.map((w) => <Win key={w.id} w={w} api={api} accent={tweaks.accent} radius={tweaks.radius} />)}

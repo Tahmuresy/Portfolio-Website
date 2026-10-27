@@ -25,7 +25,7 @@ function LoginScreen({ onEnter, onShutdown, avatar }) {
       <div className="login__main">
         <div className="login__left">
           <div className="login__brand" style={{fontSize:"26px", fontFamily:"var(--tg-serif)"}}>Tahmures Ghiyasi</div>
-          <div className="login__hint">To begin, click your user name.</div>
+          <div className="login__hint">To begin, <span className="only-desk">click</span><span className="only-phone">tap</span> your user name.</div>
         </div>
         <div className="login__divider"></div>
         <div className="login__right">

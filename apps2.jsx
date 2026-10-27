@@ -323,9 +323,9 @@ A2.Contact = () => (
       consulting, or AEC roles. I reply fastest to email.</p>
     <div style={{marginTop:8}}>
       <div className="contact__row"><span className="k">Email</span>{I2.Mail()}<a href="mailto:tghiyasi@ttu.edu">tghiyasi@ttu.edu</a></div>
-      <div className="contact__row"><span className="k">Phone</span>{I2.Help()}<span>(814) 380-1876</span></div>
+      <div className="contact__row"><span className="k">Phone</span>{I2.Help()}<a href="tel:+18143801876">(814) 380-1876</a></div>
       <div className="contact__row"><span className="k">LinkedIn</span>{I2.Globe()}<a href="#">linkedin.com/in/tahmures-ghiyasi</a></div>
-      <div className="contact__row"><span className="k">Scholar</span>{I2.Globe()}<a href="#">Google Scholar — Tahmures Ghiyasi</a></div>
+      <div className="contact__row"><span className="k">Scholar</span>{I2.Globe()}<a href="https://scholar.google.com/citations?user=oIuTKCkAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar — Tahmures Ghiyasi</a></div>
       <div className="contact__row"><span className="k">Location</span>{I2.Search()}<span>Lubbock, Texas</span></div>
     </div>
   </div>
@@ -368,13 +368,14 @@ A2.Projects = ({ open }) => {
         <div className="exp__grouphdr">Files stored on this computer</div>
         <div className="exp__grid">
           {items.map(([id,label,ico])=>(
-            <div className="exp__item" key={id} onDoubleClick={()=>open && open(id)} onClick={e=>{}}>
+            <div className="exp__item" key={id} onDoubleClick={()=>open && open(id)}
+              onClick={()=>{ if (window.isPhone && window.isPhone() && open) open(id); }}>
               <div className="exp__item__ico">{ico}</div>
               <div className="exp__item__t">{label}</div>
             </div>
           ))}
         </div>
-        <p className="ds-cap" style={{marginTop:14}}>Double-click any file to open it.</p>
+        <p className="ds-cap" style={{marginTop:14}}><span className="only-desk">Double-click</span><span className="only-phone">Tap</span> any file to open it.</p>
       </div>
     </div>
   );

@@ -205,18 +205,28 @@ Apps.Terminal = () => {
   };
 
   return (
-    <div className="term xp-scroll" ref={scroller} onClick={()=>inputRef.current && inputRef.current.focus()}>
+    <div className="term xp-scroll" ref={scroller} onClick={()=>{ if (!(window.isPhone && window.isPhone())) inputRef.current && inputRef.current.focus(); }}>
       {history.map((l, idx) => {
         if (l.kind === "img") return <img key={idx} className="term__plate" src={l.src} alt="assembly sequence"/>;
         if (l.kind === "cmd") return <div key={idx} className="term__line"><span className="prompt">jrl@orin:<b>~</b>$ </span>{l.t}</div>;
-        return <div key={idx} className={"term__line " + (l.c||"")}>{l.t}</div>;
+        // phones: collapse the "....." leaders so status words don't wrap onto their own line
+        const txt = (window.isPhone && window.isPhone() && l.t) ? l.t.replace(/ \.{3,} /, " — ") : l.t;
+        return <div key={idx} className={"term__line " + (l.c||"")}>{txt}</div>;
       })}
       {booted && (
         <div className="term__row">
           <span className="prompt">jrl@orin:<b>~</b>$</span>
-          <input ref={inputRef} autoFocus className="term__input" value={val}
+          <input ref={inputRef} autoFocus={!(window.isPhone && window.isPhone())} className="term__input" value={val}
+            autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="go"
             onChange={e=>setVal(e.target.value)}
             onKeyDown={e=>{ if(e.key==="Enter"){ run(val); setVal(""); } }}/>
+        </div>
+      )}
+      {booted && (
+        <div className="term__chips" aria-label="Commands">
+          {Object.keys(TERM_CMDS).filter(k=>k!=="help").map(k=>(
+            <button key={k} className="term__chip" onClick={e=>{ e.stopPropagation(); run(k); }}>{k}</button>
+          ))}
         </div>
       )}
       {!booted && <span className="term__cursor"></span>}

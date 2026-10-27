@@ -151,3 +151,8 @@
   left: 50%; top: 44%;
   transform: translate(-50%, -50%);
 }
+
+/* phone: keep the chip clear of the social dock */
+@media (max-width: 760px) {
+  .logo3d__chip { bottom: calc(var(--tb-h, 42px) + 72px); }
+}
