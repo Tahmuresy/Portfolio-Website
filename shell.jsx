@@ -91,14 +91,16 @@ function usePhone() {
   }, []);
   return p;
 }
-// home-screen order + short labels (recruiter-first: CV and contact lead)
+// home-screen icons, laid out XP-style: they fill DOWN each column from the
+// top-left, then move right (3 per column — see .mhome in xp.css)
 const PHONE_HOME = [
-  ["resume", "Résumé"], ["contact", "Contact"], ["projects", "My Projects"], ["mycomputer", "My Computer"], ["mondrian", "Mondrian"],
-  ["pickplace", "Pick & Place"], ["patent", "JRL Patent"], ["diagrid", "Diagrid"], ["golfpavilion", "Golf Pavilion"], ["activebending", "Active Bending"],
-  ["rotegrity", "Rotegrity"], ["tabriz", "Tabriz Audio"], ["robotic", "Robotic Fab"], ["newfolder", "New Folder"], ["recycle", "Recycle Bin"]];
-
-// bottom-edge colour of windows whose content isn't white (shows under Safari's toolbar)
-const WIN_FLOOR = { robotic: "#0a0a12", patent: "#535353", housing: "#d9d4c2" };
+  ["resume", "Résumé"], ["contact", "Contact"], ["mycomputer", "My Computer"],
+  ["projects", "My Projects"], ["mondrian", "Mondrian"], ["robotic", "Robotic Fab"],
+  ["pickplace", "Pick & Place"], ["patent", "JRL Patent"], ["diagrid", "Diagrid"],
+  ["golfpavilion", "Golf Pavilion"], ["activebending", "Active Bending"], ["rotegrity", "Rotegrity"],
+  ["tabriz", "Tabriz Audio"], ["newfolder", "New Folder"], ["recycle", "Recycle Bin"]];
+// social dock: transparent copies of the logos that ship with a white background
+const DOCK_IMG = { instagram: "ic-instagram-t.png", spotify: "ic-spotify-t.png", researchgate: "ic-researchgate-t.png" };
 
 let Z = 10;
 
@@ -554,7 +556,7 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
       <nav className="mdock" aria-label="Links">
         {DESK_ITEMS.filter((it) => it.kind === "link").map((it) =>
         <a key={it.key} className="mdock__a" href={it.url} target="_blank" rel="noopener" aria-label={it.label} title={it.label}>
-          <img src={it.img} alt="" className="nodrag" />
+          <img src={DOCK_IMG[it.key] || it.img} alt="" className="nodrag" />
         </a>
         )}
       </nav>}
