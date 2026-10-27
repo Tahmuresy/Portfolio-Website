@@ -76,6 +76,10 @@ const DESK_ITEMS = [
 { key: "researchgate", kind: "link", label: "ResearchGate", img: "assets/img/ic-researchgate.png", brand: true, url: "https://www.researchgate.net/profile/Tahmures-Ghiyasi?ev=hdr_xprf", anchor: "br", ax: 680, ay: 122 }];
 
 
+// software launchers (top-right grid) — hidden on phones via .dicon--software in xp.css
+const SOFTWARE_KEYS = new Set(["rhino", "illustrator", "photoshop", "lumion", "sketchup", "max3ds",
+  "keyshot", "autocad", "revit", "vscode", "vray", "karamba"]);
+
 let Z = 10;
 
 function useWindows() {
@@ -191,7 +195,7 @@ function Win({ w, api, accent, radius }) {
 }
 
 /* ---- Desktop icon (draggable, free-scatter) ----------------------- */
-function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover }) {
+function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover, extraClass }) {
   const moved = uR(false);
   const ref = uR(null);
   const down = (e) => {
@@ -220,7 +224,7 @@ function DIcon({ icon, label, pos, selected, onSelect, onOpen, onMove, onHover }
     window.addEventListener("pointermove", mv);window.addEventListener("pointerup", up);
   };
   return (
-    <div ref={ref} className={"dicon" + (selected ? " is-selected" : "")}
+    <div ref={ref} className={"dicon" + (selected ? " is-selected" : "") + (extraClass ? " " + extraClass : "")}
     style={{ left: pos.x, top: pos.y }}
     onPointerDown={down}
     onMouseEnter={() => { if (onHover && !moved.current) onHover(true); }}
@@ -488,6 +492,7 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
       <DIcon key={it.key}
       icon={it.img ? <img src={it.img} alt="" className={"nodrag" + (it.brand ? " brand" : "")} /> : ICON(REG[it.key].icon)}
       label={it.label} pos={positions[it.key]} selected={sel === it.key}
+      extraClass={SOFTWARE_KEYS.has(it.key) ? "dicon--software" : ""}
       onSelect={() => setSel(it.key)} onOpen={() => openItem(it)}
       onHover={it.preview ? (on) => setPreview(on ? it : null) : null}
       onMove={(x, y) => moveIcon(it.key, x, y)} />

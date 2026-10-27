@@ -620,3 +620,9 @@ html, body {
   .dicon:hover .dicon__img { transform:none; }
   .hoverprev__plate, .hoverprev__cap { transition:opacity .12s ease-out; transform:none; }
 }
+
+/* phones: hide the software launcher icons (Rhino, Autodesk, Adobe, etc.) —
+   their top-right anchors pile onto the left column on narrow screens */
+@media (max-width: 760px) {
+  .dicon--software { display: none !important; }
+}
