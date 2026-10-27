@@ -498,12 +498,14 @@ function Desktop({ tweaks, onLogoff, avatar, wallpaper }) {
   uE(() => {
     const root = document.documentElement;
     const meta = document.querySelector('meta[name="theme-color"]');
-    const clear = () => { root.classList.remove("m-win"); root.style.removeProperty("--m-floor"); };
+    const clear = () => { root.classList.remove("m-win"); root.style.removeProperty("--m-floor"); root.style.removeProperty("--m-ceil"); };
     if (!phone) { clear(); return clear; }
     const top = api.wins.filter((w) => !w.min).sort((a, b) => b.z - a.z)[0];
     root.classList.toggle("m-win", !!top);
     if (top) root.style.setProperty("--m-floor", WIN_FLOOR[top.id] || "#ffffff");
-    if (meta) meta.setAttribute("content", top ? "#0a60e8" : "#5f9cf0");
+    const ceil = top ? "#0a60e8" : "#5f9cf0";       // Safari's status-bar strip colour
+    root.style.setProperty("--m-ceil", ceil);
+    if (meta) meta.setAttribute("content", ceil);
     return clear;
   }, [phone, api.wins]);
 

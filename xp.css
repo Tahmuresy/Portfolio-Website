@@ -644,9 +644,22 @@ html, body {
      phones nothing on the desktop is fixed, and .mwall — a real element holding
      a taller copy of the wallpaper — physically reaches past the top and bottom
      of the screen, under both bars. With a window open, .mwall shows the
-     title-bar blue above and the window's own colour below instead. */
-  html, body { background-color:#5f9cf0 !important; overscroll-behavior:none; }
+     title-bar blue above and the window's own colour below instead.
+     The TOP strip is the exception: with the page at rest Safari paints it in
+     the page's background colour only (--m-ceil, set from shell.jsx: sky blue,
+     or title-bar blue with a window open), so the wallpaper's top edge fades
+     into that exact colour and the two meet without a line. */
+  html, body { background-color:var(--m-ceil, #5f9cf0) !important; overscroll-behavior:none; }
   .desktop { position:absolute; background:transparent; overflow:visible; }
+  .desktop::before {
+    content:""; position:absolute; left:0; right:0; top:0; z-index:4; pointer-events:none;
+    height:calc(64px + env(safe-area-inset-top, 0px));
+    background:linear-gradient(180deg,
+      var(--m-ceil, #5f9cf0) 0%,
+      color-mix(in srgb, var(--m-ceil, #5f9cf0) 72%, transparent) 22%,
+      color-mix(in srgb, var(--m-ceil, #5f9cf0) 35%, transparent) 55%,
+      transparent 100%);
+  }
   .taskbar { position:absolute; }
 
   /* ---- home screen: 5-up icon grid, tap to open ---- */
