@@ -24,8 +24,13 @@ const ACCENTS = {
 
 function App() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [phase, setPhase] = uaS(() => localStorage.getItem("jrl_phase") || "boot");
-  uaE(() => { localStorage.setItem("jrl_phase", phase); }, [phase]);
+  // No boot or login screens: the site opens straight onto the desktop (the
+  // wallpaper is already painted by the page while scripts load, and the
+  // desktop UI fades in on top — see "straight into Windows" in xp.css).
+  // Log Off / Turn Off fade to black and bring back a fresh desktop.
+  const [gen, setGen] = uaS(0);
+  const [veil, setVeil] = uaS(false);
+  const restart = () => { setVeil(true); setTimeout(() => { setGen(g => g + 1); setVeil(false); }, 420); };
 
   const logo = "assets/img/logo.jpg";
   const avatar = "assets/img/avatar.jpg";
@@ -40,15 +45,8 @@ function App() {
 
   return (
     <div style={cssVars}>
-      {phase === "boot" &&
-        <BootSplash logo={logo} onDone={()=>setPhase("login")}/>}
-      {phase === "login" &&
-        <LoginScreen avatar={avatar}
-          onEnter={()=>setPhase("desktop")}
-          onShutdown={()=>setPhase("boot")}/>}
-      {phase === "desktop" &&
-        <Shell.Desktop tweaks={t} avatar={avatar} wallpaper={wallpaper}
-          onLogoff={()=>setPhase("login")}/>}
+      <Shell.Desktop key={gen} tweaks={t} avatar={avatar} wallpaper={wallpaper} onLogoff={restart}/>
+      <div className={"restart-veil" + (veil ? " is-on" : "")} aria-hidden="true"></div>
 
       <TweaksPanel>
         <TweakSection label="Theme" />
@@ -62,7 +60,7 @@ function App() {
         <TweakRadio label="Wallpaper" value={t.wallStyle}
           options={["logo","bliss","memphis","solid"]}
           onChange={v=>setTweak("wallStyle", v)} />
-        <TweakButton label="Replay boot" onClick={()=>{ localStorage.setItem("jrl_phase","boot"); location.reload(); }} />
+        <TweakButton label="Restart desktop" onClick={restart} />
       </TweaksPanel>
     </div>
   );

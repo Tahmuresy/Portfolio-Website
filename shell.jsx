@@ -102,6 +102,9 @@ const PHONE_HOME = [
 // social dock: transparent copies of the logos that ship with a white background
 const DOCK_IMG = { instagram: "ic-instagram-t.png", spotify: "ic-spotify-t.png", researchgate: "ic-researchgate-t.png" };
 
+// bottom-edge colour of windows whose content isn't white (shows under Safari's toolbar)
+const WIN_FLOOR = { robotic: "#0a0a12", patent: "#535353", housing: "#d9d4c2" };
+
 let Z = 10;
 
 function useWindows() {

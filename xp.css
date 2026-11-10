@@ -622,6 +622,26 @@ html, body {
 }
 
 /* =========================================================================
+   STRAIGHT INTO WINDOWS — no boot/login screens. The page itself shows the
+   wallpaper while the scripts load (no blank or red flash), then the desktop
+   UI fades in on top and the taskbar slides up, like XP finishing start-up.
+   ========================================================================= */
+body { background:#5a7edc url(assets/img/bliss-logo.jpg) center center / cover no-repeat; }
+@keyframes ui-in { from { opacity:0; } }
+@keyframes tb-in { from { transform:translateY(100%); } }
+.desktop__wall, .dicon, .mhome, .mdock, .desktop::before { animation:ui-in .6s ease-out both; }
+.taskbar { animation:tb-in .45s cubic-bezier(.22,.61,.36,1) .12s both; }
+.restart-veil {
+  position:fixed; inset:0; z-index:100001; background:#000;
+  opacity:0; pointer-events:none; transition:opacity .4s ease;
+}
+.restart-veil.is-on { opacity:1; pointer-events:auto; }
+@media (prefers-reduced-motion: reduce) {
+  .desktop__wall, .dicon, .mhome, .mdock, .desktop::before, .taskbar { animation:none; }
+  .restart-veil { transition:none; }
+}
+
+/* =========================================================================
    PHONE (≤760px) — the desktop becomes a home screen; windows become
    full-screen sheets. Everything above this line is the desktop design and
    is untouched; these rules only kick in on small screens.
